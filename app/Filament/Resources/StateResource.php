@@ -21,6 +21,11 @@ class StateResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-flag';
     protected static ?string $navigationGroup = 'World';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -116,6 +121,8 @@ class StateResource extends Resource
     {
         return [
             RelationManagers\CitiesRelationManager::class,
+            RelationManagers\ParliamentsRelationManager::class,
+            RelationManagers\DunsRelationManager::class
         ];
     }
 

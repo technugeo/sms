@@ -17,9 +17,15 @@ class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
 
+    protected static ?int $navigationSort = 1;
     protected static ?string $navigationIcon = 'heroicon-o-globe-asia-australia';
 
     protected static ?string $navigationGroup = 'World';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
     public static function form(Form $form): Form
     {

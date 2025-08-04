@@ -7,11 +7,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-pdo": "*",
         "filament/filament": "^3.3",
+        "filament/spatie-laravel-media-library-plugin": "^3.3",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
-        "tomatophp/filament-tenancy": "^1.0",
-        "ext-pdo": "*"
+        "tomatophp/filament-tenancy": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

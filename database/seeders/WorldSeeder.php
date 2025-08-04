@@ -39,6 +39,7 @@ class WorldSeeder extends Seeder
             'countries.sql',
             'states.sql',
             'cities.sql',
+            'parliament_dun.sql',
         ];
 
         foreach ($sqlFiles as $file) {

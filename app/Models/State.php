@@ -52,4 +52,14 @@ class State extends Model
     {
         return $this->hasMany(City::class);
     }
+
+    public function parliaments(): HasMany
+    {
+        return $this->hasMany(Parliament::class, 'state_id','iso2');
+    }
+
+    public function duns(): HasMany
+    {
+        return $this->hasMany(Dun::class, 'code_state','iso2');
+    }
 }

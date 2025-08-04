@@ -17,9 +17,15 @@ class SubregionResource extends Resource
 {
     protected static ?string $model = Subregion::class;
 
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-globe-europe-africa';
 
     protected static ?string $navigationGroup = 'World';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
     public static function form(Form $form): Form
     {
