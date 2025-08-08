@@ -32,5 +32,11 @@ class Subject extends Model
         'status' => StatusEnum::class,
     ];
 
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class, 'semester_id');
+    }
+
+
 
 }

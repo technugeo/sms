@@ -60,6 +60,11 @@ class Institute extends Model
     {
         return $this->belongsTo(Dun::class, 'dun',);
     }
+
+    public function departments()
+    {
+        return $this->hasMany(Department::class, 'institute_id');
+    }
         
 
     //

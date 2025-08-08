@@ -18,4 +18,20 @@ class EditCourse extends EditRecord
             Actions\RestoreAction::make(),
         ];
     }
+    public function getBreadcrumbs(): array
+    {
+        $course = $this->record;
+        $department = $course->department;
+        $institute = $department->institute;
+
+        return [
+            route('filament.admin.resources.institutes.index') => 'Institutes',
+            route('filament.admin.resources.institutes.edit', $institute) => $institute->name,
+            route('filament.admin.resources.departments.view', $department) => $department->name,
+            route('filament.admin.resources.courses.view', $course) => $course->prog_name ?? 'View Course',
+            url()->current() => 'Edit',
+        ];
+    }
+
+
 }

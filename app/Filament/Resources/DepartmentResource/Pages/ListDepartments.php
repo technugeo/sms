@@ -14,6 +14,7 @@ class ListDepartments extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\ViewAction::make(),
         ];
     }
 }

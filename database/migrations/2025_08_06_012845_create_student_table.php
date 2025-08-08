@@ -27,7 +27,9 @@ return new class extends Migration
             $table->enum('gender', array_column(\App\Enum\GenderEnum::cases(), 'value'));
             $table->enum('race', array_column(\App\Enum\RaceEnum::cases(), 'value'));
             $table->enum('religion', array_column(\App\Enum\ReligionEnum::cases(), 'value'));
-            $table->string('intake_year');
+            $table->string('intake_month');
+            $table->integer('intake_year');
+            $table->integer('current_course');
             $table->timestamps();
         });
     }

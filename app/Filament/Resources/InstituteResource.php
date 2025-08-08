@@ -146,6 +146,8 @@ class InstituteResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->visible(fn () => true),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -160,7 +162,7 @@ class InstituteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DepartmentsRelationManager::class,
         ];
     }
 
@@ -169,6 +171,7 @@ class InstituteResource extends Resource
         return [
             'index' => Pages\ListInstitutes::route('/'),
             'create' => Pages\CreateInstitute::route('/create'),
+            'view' => Pages\ViewInstitute::route('/{record}'),
             'edit' => Pages\EditInstitute::route('/{record}/edit'),
         ];
     }
@@ -189,4 +192,21 @@ class InstituteResource extends Resource
     {
         return 0;
     }
+
+    public static function getBreadcrumbs(array $parameters = []): array
+    {
+        if (isset($parameters['record'])) {
+            $record = static::resolveRecord($parameters['record']);
+
+            return [
+                static::getUrl() => 'Institutes',
+                static::getUrl('edit', ['record' => $record]) => $record->name,
+            ];
+        }
+
+        return [
+            static::getUrl() => 'Institutes',
+        ];
+    }
+
 }

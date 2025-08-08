@@ -35,14 +35,31 @@ class StudentResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('current_course')
+                    ->label('Course')
+                    ->options(function () {
+                        return \App\Models\Course::all()->mapWithKeys(function ($course) {
+                            return [$course->prog_code => "{$course->prog_code} - {$course->prog_name}"];
+                        })->toArray();
+                    })
+                    ->required()
+                    ->reactive()
+                    ->columnSpanFull(),
+
+                Forms\Components\Select::make('intake_month')
+                    ->required()
+                    ->options(IntakeEnum::class),
+
+                Forms\Components\TextInput::make('intake_year')
+                    ->required()
+                    ->maxLength(4),
+
                 Forms\Components\TextInput::make('full_name')
                     ->required(),
 
                 Forms\Components\TextInput::make('nric')
                     ->required()
                     ->maxLength(12),
-                // Forms\Components\TextInput::make('matric_id')
-                //     ->required(),
 
                 Forms\Components\TextInput::make('email')
                     ->email()
@@ -52,18 +69,20 @@ class StudentResource extends Resource
                     ->tel()
                     ->required()
                     ->numeric(),
-                    
+
                 // Nationality (saved as country name to `students` table)
                 Forms\Components\Select::make('nationality')
                     ->label('Nationality')
                     ->options(Country::pluck('name', 'name')->toArray())
                     ->required()
                     ->searchable(),
+
                 Forms\Components\TextInput::make('passport_no'),
 
                 Forms\Components\Select::make('gender')
                     ->required()
                     ->options(GenderEnum::class),
+
                 Forms\Components\Select::make('marriage_status')
                     ->required()
                     ->options(MarriageEnum::class),
@@ -71,7 +90,6 @@ class StudentResource extends Resource
                 Forms\Components\Select::make('race')
                     ->required()
                     ->options(RaceEnum::class),
-
 
                 Forms\Components\Select::make('religion')
                     ->required()
@@ -81,24 +99,15 @@ class StudentResource extends Resource
                     ->label('Bumiputera')
                     ->required()
                     ->options(CitizenEnum::class),
-                    
 
-                
                 Forms\Components\Select::make('nationality_type')
                     ->required()
                     ->options(NationalityEnum::class),
 
-
                 Forms\Components\Select::make('academic_status')
                     ->required()
                     ->options(AcademicEnum::class),
-
-                Forms\Components\Select::make('intake_year')
-                    ->required()
-                    ->options(IntakeEnum::class),
-
             ]);
-
     }
 
     public static function table(Table $table): Table
@@ -113,10 +122,11 @@ class StudentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('passport_no')
                     ->searchable(),
-                    
                 Tables\Columns\TextColumn::make('nationality_type'),
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
+                Tables\Columns\TextColumn::make('user.status')
+                    ->label('Account status'),
                 Tables\Columns\TextColumn::make('academic_status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -142,14 +152,12 @@ class StudentResource extends Resource
 
     public static function getRelations(): array
     {
+        
         return [
-            \App\Filament\Resources\StudentResource\RelationManagers\LocalAddressRelationManager::class,
-            \App\Filament\Resources\StudentResource\RelationManagers\ForeignAddressRelationManager::class,
+            RelationManagers\LocalAddressRelationManager::class,
+            RelationManagers\ForeignAddressRelationManager::class,
         ];
     }
-
-
-
 
     public static function getPages(): array
     {
@@ -157,7 +165,6 @@ class StudentResource extends Resource
             'index' => Pages\ListStudents::route('/'),
             'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
-            
         ];
     }
 
@@ -168,12 +175,14 @@ class StudentResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
     public static function getNavigationGroup(): ?string
     {
         return 'User Management';
     }
+
     public static function getNavigationSort(): ?int
     {
-        return 0; 
+        return 0;
     }
 }

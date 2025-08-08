@@ -30,10 +30,17 @@ class Course extends Model
         'status' => StatusEnum::class,
     ];
     
-    public function department(): BelongsTo
+    public function department()
     {
         return $this->belongsTo(Department::class, 'faculty_id');
     }
+
+    public function semesters()
+    {
+        return $this->hasMany(Semester::class, 'prog_code', 'prog_code');
+    }
+
+
 
     //
 }

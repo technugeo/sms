@@ -9,6 +9,7 @@ use App\Enum\NationalityEnum;
 use App\Enum\RaceEnum;
 use App\Enum\ReligionEnum;
 use App\Enum\IntakeEnum;
+use App\Enum\GenderEnum;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,8 +36,10 @@ class Student extends Model
         'gender',
         'race',
         'religion',
+        'intake_month',
         'intake_year',
         'passport_no',
+        'current_course',
     ];
 
     protected $casts = [
@@ -47,7 +50,7 @@ class Student extends Model
         'gender' => GenderEnum::class,
         'race' => RaceEnum::class,
         'religion' => ReligionEnum::class,
-        'intake_year' => IntakeEnum::class,
+        'intake_month' => IntakeEnum::class,
     ];
 
     /**
@@ -63,6 +66,8 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+   
     
 
     
@@ -83,6 +88,11 @@ class Student extends Model
         return $this->belongsTo(\App\Models\Address::class);
     }
 
+    
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class, 'current_course');
+    }
     
 
 }

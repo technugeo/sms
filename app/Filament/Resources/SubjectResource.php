@@ -112,6 +112,10 @@ class SubjectResource extends Resource
             ]);
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
     
     public static function getNavigationGroup(): ?string
     {

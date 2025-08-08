@@ -19,10 +19,16 @@ class Department extends Model
         'status',
     ];
 
-    public function institute(): BelongsTo
+    public function institute()
     {
         return $this->belongsTo(Institute::class, 'institute_id');
     }
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'faculty_id');
+    }
+
 
 
     public function designations(): HasMany

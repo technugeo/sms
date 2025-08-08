@@ -15,9 +15,7 @@ class LocalAddressRelationManager extends RelationManager
 {
     protected static string $relationship = 'localAddress';
 
-    /**
-     * Show only if student is not foreign
-     */
+    
     public static function canViewForRecord(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): bool
     {
         return $ownerRecord->citizen !== 'foreign';

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->string('address_1');
-            $table->string('address_2');
+            $table->string('address_2')->nullable();
             $table->string('address_3')->nullable();
             $table->integer('postcode');
             $table->unsignedMediumInteger('country_id');

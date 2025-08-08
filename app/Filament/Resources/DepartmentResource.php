@@ -34,6 +34,7 @@ class DepartmentResource extends Resource
                         ->reactive()
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('name')
+                        ->label('Department/Faculty')
                         ->required()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('code')
@@ -76,6 +77,9 @@ class DepartmentResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->visible(fn () => true),
+
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -90,15 +94,17 @@ class DepartmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\CoursesRelationManager::class,
         ];
     }
+
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListDepartments::route('/'),
             'create' => Pages\CreateDepartment::route('/create'),
+            'view' => Pages\ViewDepartment::route('/{record}'),
             'edit' => Pages\EditDepartment::route('/{record}/edit'),
         ];
     }
@@ -110,6 +116,11 @@ class DepartmentResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return 'Management';

@@ -1,32 +1,23 @@
 <?php
 
-namespace App\Filament\Resources;
-
-use App\Filament\Resources\CourseResource\Pages;
-use App\Filament\Resources\CourseResource\RelationManagers;
-
-use App\Models\Course;
-use App\Models\Department;
+namespace App\Filament\Resources\DepartmentResource\RelationManagers;
 
 use App\Enum\ProgrammeEnum;
 use App\Enum\StatusEnum;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CourseResource extends Resource
+class CoursesRelationManager extends RelationManager
 {
-    protected static ?string $model = Course::class;
+    protected static string $relationship = 'courses';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -37,11 +28,6 @@ class CourseResource extends Resource
                     ->label('Course Name')
                     ->required()
                     ->maxLength(255),
-
-                Forms\Components\Select::make('faculty_id')
-                    ->relationship('department', 'name')
-                    ->required()
-                    ->reactive(),
 
                 Forms\Components\Select::make('programme_type')
                     ->label('Programme Type')
@@ -60,18 +46,19 @@ class CourseResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('department.name')
-                    ->label('Department/Faculty')
-                    ->searchable(),
+                // Tables\Columns\TextColumn::make('department.name')
+                //     ->label('Department/Faculty')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('prog_code')
-                    ->label('Programme Code')
+                    ->label('Course Code')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('prog_name')
-                    ->label('Programme Name')
+                    ->label('Course Name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('programme_type')
                     ->label('Programme Type')
@@ -95,57 +82,22 @@ class CourseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                //
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->url(fn ($record) => route('filament.admin.resources.courses.view', $record))
+                    ->openUrlInNewTab(false), 
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            RelationManagers\SemestersRelationManager::class,
-        ];
-    }
-
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListCourses::route('/'),
-            'create' => Pages\CreateCourse::route('/create'),
-            'view' => Pages\ViewCourse::route('/{record}'),
-            'edit' => Pages\EditCourse::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
-    
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Management';
-    }
-    public static function getNavigationSort(): ?int
-    {
-        return 2;
     }
 }
