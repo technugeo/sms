@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
+
+        Schema::create('lib_course_prog', function (Blueprint $table) {
             $table->id();
-            $table->integer('institute_id');
-            $table->string('name')->unique();
-            $table->string('code', 4)->unique();
-            $table->text('description');
+            $table->integer('prog_code');
+            $table->string('prog_name');
+            $table->integer('faculty_id');
+            $table->string('programme_type')->nullable();
+            $table->string('sponsoring_body');
             $table->string('status')->nullable();
+            $table->integer('created_by');
+            $table->integer('updated_by');
+            $table->integer('deleted_by');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -28,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('lib_course_prog');
     }
 };

@@ -4,7 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StaffResource\Pages;
 use App\Filament\Resources\StaffResource\RelationManagers;
+use App\Filament\Resources\StaffResource\RelationManagers\AddressRelationManager;
+
 use App\Models\Staff;
+use App\Models\Designation;
+use App\Enum\CitizenEnum;
+use App\Enum\MarriageEnum;
+use App\Enum\GenderEnum;
+use App\Enum\NationalityEnum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -23,6 +30,13 @@ class StaffResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->label('Full Name')
+                    ->required(),
+
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required(),
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
                     ->required()
@@ -30,33 +44,57 @@ class StaffResource extends Resource
                 Forms\Components\TextInput::make('nric')
                     ->required()
                     ->maxLength(12),
-                Forms\Components\Select::make('nationality_id')
-                    ->relationship('nationality', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('nationality_type')
-                    ->required(),
-                Forms\Components\TextInput::make('citizen')
-                    ->required(),
-                Forms\Components\TextInput::make('marriage_status')
-                    ->required(),
-                Forms\Components\TextInput::make('gender')
-                    ->required(),
-                Forms\Components\TextInput::make('address_id')
+
+                
+                Forms\Components\Select::make('nationality_type')
                     ->required()
-                    ->numeric(),
-                Forms\Components\Select::make('designation_id')
-                    ->relationship('designation', 'name')
-                    ->required(),
+                    ->options(NationalityEnum::class),
+
+                Forms\Components\Select::make('citizen')
+                    ->required()
+                    ->options(CitizenEnum::class),
+                // Forms\Components\TextInput::make('citizen')
+                //     ->required(),
+                // Forms\Components\TextInput::make('marriage_status')
+                //     ->required(),
+                Forms\Components\Select::make('marriage_status')
+                    ->required()
+                    ->options(MarriageEnum::class),
+                // Forms\Components\TextInput::make('gender')
+                //     ->required(),
+                Forms\Components\Select::make('gender')
+                    ->required()
+                    ->options(GenderEnum::class),
+                // Forms\Components\TextInput::make('address_id')
+                //     ->required()
+                //     ->numeric(),
                 Forms\Components\Select::make('department_id')
                     ->relationship('department', 'name')
-                    ->required(),
+                    ->required()
+                    ->reactive(),
+                Forms\Components\Select::make('designation_id')
+                    ->label('Designation')
+                    ->relationship(
+                        name: 'designation',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn ($query, $get) => $query->where('department_id', $get('department_id'))
+                    )
+                    ->required()
+                    ->disabled(fn (callable $get) => !$get('department_id'))
+                    ->reactive(),
+
             ]);
+
     }
+
+    
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('user.name')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('phone_number')
                     ->numeric()
                     ->sortable(),
@@ -103,7 +141,7 @@ class StaffResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\AddressRelationManager::class,
         ];
     }
 
@@ -114,5 +152,13 @@ class StaffResource extends Resource
             'create' => Pages\CreateStaff::route('/create'),
             'edit' => Pages\EditStaff::route('/{record}/edit'),
         ];
+    }
+    public static function getNavigationGroup(): ?string
+    {
+        return 'User Management';
+    }
+    public static function getNavigationSort(): ?int
+    {
+        return 0;
     }
 }

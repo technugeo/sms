@@ -16,16 +16,22 @@ class Address extends Model
         'country_id',
         'state_id',
         'city_id',
+        'address_type',
     ];
 
-    public function user(): void
+    public function user(): BelongsTo
     {
-        $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function country(): BelongsTo
+    public function staff(): HasOne
     {
-        return $this->belongsTo(Country::class);
+        return $this->hasOne(Staff::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(\App\Models\Country::class);
     }
 
     public function state(): BelongsTo

@@ -17,6 +17,7 @@ class Staff extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
+        'user_id',
         'phone_number',
         'nric',
         'nationality_id',
@@ -36,6 +37,11 @@ class Staff extends Model implements HasMedia
         'gender' => GenderEnum::class,
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * Get Nationality
      * @return BelongsTo
@@ -47,13 +53,19 @@ class Staff extends Model implements HasMedia
 
     /**
      * Get Addresses
-     * @return HasMany
      */
-    public function addresses(): HasMany
+    public function addresses()
     {
-        return $this->hasMany(Address::class);
+        return $this->hasMany(\App\Models\Address::class, 'user_id', 'user_id');
     }
 
+    public function address()
+    {
+        return $this->belongsTo(\App\Models\Address::class);
+    }
+    
+
+    
     /**
      * Get Designation
      * @return BelongsTo

@@ -1,0 +1,179 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\StudentResource\Pages;
+use App\Filament\Resources\StudentResource\RelationManagers;
+
+use App\Models\Student;
+use App\Models\Country;
+
+use App\Enum\CitizenEnum;
+use App\Enum\MarriageEnum;
+use App\Enum\AcademicEnum;
+use App\Enum\NationalityEnum;
+use App\Enum\GenderEnum;
+use App\Enum\RaceEnum;
+use App\Enum\ReligionEnum;
+use App\Enum\IntakeEnum;
+
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class StudentResource extends Resource
+{
+    protected static ?string $model = Student::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('full_name')
+                    ->required(),
+
+                Forms\Components\TextInput::make('nric')
+                    ->required()
+                    ->maxLength(12),
+                // Forms\Components\TextInput::make('matric_id')
+                //     ->required(),
+
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required(),
+
+                Forms\Components\TextInput::make('phone_number')
+                    ->tel()
+                    ->required()
+                    ->numeric(),
+                    
+                // Nationality (saved as country name to `students` table)
+                Forms\Components\Select::make('nationality')
+                    ->label('Nationality')
+                    ->options(Country::pluck('name', 'name')->toArray())
+                    ->required()
+                    ->searchable(),
+                Forms\Components\TextInput::make('passport_no'),
+
+                Forms\Components\Select::make('gender')
+                    ->required()
+                    ->options(GenderEnum::class),
+                Forms\Components\Select::make('marriage_status')
+                    ->required()
+                    ->options(MarriageEnum::class),
+
+                Forms\Components\Select::make('race')
+                    ->required()
+                    ->options(RaceEnum::class),
+
+
+                Forms\Components\Select::make('religion')
+                    ->required()
+                    ->options(ReligionEnum::class),
+
+                Forms\Components\Select::make('citizen')
+                    ->label('Bumiputera')
+                    ->required()
+                    ->options(CitizenEnum::class),
+                    
+
+                
+                Forms\Components\Select::make('nationality_type')
+                    ->required()
+                    ->options(NationalityEnum::class),
+
+
+                Forms\Components\Select::make('academic_status')
+                    ->required()
+                    ->options(AcademicEnum::class),
+
+                Forms\Components\Select::make('intake_year')
+                    ->required()
+                    ->options(IntakeEnum::class),
+
+            ]);
+
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('full_name'),
+                Tables\Columns\TextColumn::make('matric_id')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('nric')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('passport_no')
+                    ->searchable(),
+                    
+                Tables\Columns\TextColumn::make('nationality_type'),
+                Tables\Columns\TextColumn::make('citizen'),
+                Tables\Columns\TextColumn::make('marriage_status'),
+                Tables\Columns\TextColumn::make('academic_status'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            \App\Filament\Resources\StudentResource\RelationManagers\LocalAddressRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\ForeignAddressRelationManager::class,
+        ];
+    }
+
+
+
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListStudents::route('/'),
+            'create' => Pages\CreateStudent::route('/create'),
+            'edit' => Pages\EditStudent::route('/{record}/edit'),
+            
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+    public static function getNavigationGroup(): ?string
+    {
+        return 'User Management';
+    }
+    public static function getNavigationSort(): ?int
+    {
+        return 0; 
+    }
+}

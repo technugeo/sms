@@ -16,4 +16,36 @@ class EditStaff extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    /**
+     * Pre-fill the form with user name and email.
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $user = $this->record->user;
+
+        $data['name'] = $user?->name ?? '';
+        $data['email'] = $user?->email ?? '';
+
+        return $data;
+    }
+
+    /**
+     * Save changes to user and staff.
+     */
+    protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
+    {
+        // Update the related user (name & email)
+        $record->user->update([
+            'name'  => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        // Remove user-specific fields before updating the staff
+        unset($data['name'], $data['email']);
+
+        $record->update($data);
+
+        return $record;
+    }
 }

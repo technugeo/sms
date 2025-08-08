@@ -11,19 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('staff', function (Blueprint $table) {
+
+        Schema::create('student', function (Blueprint $table) {
             $table->id();
-            $table->integer('phone_number');
+            $table->string('matric_id');
             $table->string('nric', 12)->unique();
-            $table->foreignId('nationality_id')->constrained('nationalities')->restrictOnDelete();
+            $table->string('passport_no')->nullable();
+            $table->integer('phone_number');
+            $table->string('full_name');
             $table->enum('nationality_type',array_column(\App\Enum\NationalityEnum::cases(), 'value'));
             $table->enum('citizen',array_column(\App\Enum\CitizenEnum::cases(), 'value'));
             $table->enum('marriage_status', array_column(\App\Enum\MarriageEnum::cases(), 'value'));
+            $table->string('nationality');
+            $table->enum('academic_status', array_column(\App\Enum\AcademicEnum::cases(), 'value'));
             $table->enum('gender', array_column(\App\Enum\GenderEnum::cases(), 'value'));
-            // $table->foreignId('address_id')->constrained('addresses')->restrictOnDelete();
-            $table->foreignId('address_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('designation_id')->constrained('designations')->restrictOnDelete();
-            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
+            $table->enum('race', array_column(\App\Enum\RaceEnum::cases(), 'value'));
+            $table->enum('religion', array_column(\App\Enum\ReligionEnum::cases(), 'value'));
+            $table->string('intake_year');
             $table->timestamps();
         });
     }
@@ -33,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('staff');
+        Schema::dropIfExists('student');
     }
 };
