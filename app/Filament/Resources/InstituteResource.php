@@ -186,11 +186,11 @@ class InstituteResource extends Resource
     
     public static function getNavigationGroup(): ?string
     {
-        return 'Management';
+        return 'Data Configuration';
     }
     public static function getNavigationSort(): ?int
     {
-        return 0;
+        return 1;
     }
 
     public static function getBreadcrumbs(array $parameters = []): array
