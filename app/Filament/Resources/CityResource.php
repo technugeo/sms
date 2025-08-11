@@ -139,4 +139,8 @@ class CityResource extends Resource
             'edit' => Pages\EditCity::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Models\Course;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Facades\DB;
 
 class StudentsImport implements ToCollection, WithHeadingRow
 {
@@ -24,6 +26,19 @@ class StudentsImport implements ToCollection, WithHeadingRow
         return $months[$monthName] ?? '00';
     }
 
+    protected function generateTempPassword(int $length = 12): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $password = '';
+        $maxIndex = strlen($chars) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
@@ -31,12 +46,17 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // First create the user
+            // Generate temp password and hash it
+            $tempPassword = $this->generateTempPassword();
+            $hashedTempPassword = Hash::make($tempPassword);
+
+            // Create user first with original email temporarily
             $user = User::create([
-                'name' => $row['full_name'],
-                'email' => $row['email'],
+                'name'         => $row['full_name'],
+                'email'        => $row['email'], // temporary email
                 'profile_type' => Student::class,
-                'password' => Hash::make('password'), // or generate dynamically
+                'role'         => 'S',
+                'password'     => $hashedTempPassword,
             ]);
 
             // Prepare matric_id
@@ -44,16 +64,30 @@ class StudentsImport implements ToCollection, WithHeadingRow
             $progCode = $course ? $course->prog_code : '00';
             $progCode = str_pad($progCode, 2, '0', STR_PAD_LEFT);
 
-            // Use user id as running number (matches form logic)
             $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
 
             $intakeYear = $row['intake_year'];
             $intakeMonth = $row['intake_month'];
             $intake = substr($intakeYear, 2, 2) . $this->convertMonthNameToNumber($intakeMonth);
 
-            $matricId = $progCode . $runningNo . $intake;
+            $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-            // Now create the student with user_id attached
+            // Update user email to matricId
+            $user->email = $matricId;
+            $user->save();
+
+            // Insert password reset token record using matricId as email
+            DB::table('password_reset_tokens')->insert([
+                'user_id'            => $user->id,
+                'email'              => $matricId,
+                'token'              => Str::uuid(),
+                'temp_hash_password' => $hashedTempPassword,
+                'temp_password'      => $tempPassword,
+                'created_at'         => now(),
+                'updated_at'         => now(),
+            ]);
+
+            // Now create the student with user_id and matric_id attached
             Student::create([
                 'user_id'          => $user->id,
                 'matric_id'        => $matricId,
@@ -62,7 +96,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 'intake_year'      => $row['intake_year'],
                 'full_name'        => $row['full_name'],
                 'nric'             => $row['nric'],
-                'email'            => $row['email'],
+                'email'            => $row['email'], // optional: can keep original email here
                 'phone_number'     => $row['phone_number'],
                 'nationality'      => $row['nationality'],
                 'passport_no'      => $row['passport_no'] ?? null,

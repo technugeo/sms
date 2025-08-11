@@ -9,12 +9,12 @@ use App\Models\Address;
 use App\Models\Course;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class CreateStudent extends CreateRecord
 {
     protected static string $resource = StudentResource::class;
 
-    // Helper function to convert month name to two-digit number string
     protected function convertMonthNameToNumber(string $monthName): string
     {
         $months = [
@@ -27,61 +27,70 @@ class CreateStudent extends CreateRecord
         return $months[$monthName] ?? '00';
     }
 
+    protected function generateTempPassword(int $length = 12): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $password = '';
+        $maxIndex = strlen($chars) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+
     protected function handleRecordCreation(array $data): Student
     {
-        
+        // Generate temp password
+        $tempPassword = $this->generateTempPassword();
+
+        // Hash temp password
+        $hashedTempPassword = Hash::make($tempPassword);
+
+        // Create user first with original email temporarily
         $user = User::create([
             'name'         => $data['full_name'],
-            'email'        => $data['email'],
+            'email'        => $data['email'], // temporary, will update after matricId generation
             'profile_type' => Student::class,
-            'password'     => Hash::make('password'),
+            'role'         => 'S',
+            'password'     => $hashedTempPassword,
         ]);
 
-        
-        unset($data['email']);
-        $data['user_id'] = $user->id;
-
-        
+        // Now generate matricId using $user->id
         $course = Course::where('prog_code', $data['current_course'])->first();
-
-        $progCode = $course ? $course->prog_code : '00'; 
-
-        
+        $progCode = $course ? $course->prog_code : '00';
         $progCode = str_pad($progCode, 2, '0', STR_PAD_LEFT);
 
-        
         $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
 
-        
-        $intakeYear = $data['intake_year']; 
-        $intakeMonth = $data['intake_month']; 
-
+        $intakeYear = $data['intake_year'];
+        $intakeMonth = $data['intake_month'];
         $intake = substr($intakeYear, 2, 2) . $this->convertMonthNameToNumber($intakeMonth);
 
-        $matricId = $progCode . $runningNo . $intake;
+        $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
+        // Update user email to matricId
+        $user->email = $matricId;
+        $user->save();
+
+        // Insert password reset token record using matricId as email
+        \DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $matricId,
+            'token'              => \Str::uuid(),
+            'temp_hash_password' => $hashedTempPassword,
+            'temp_password'      => $tempPassword,
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        // Prepare student data
+        unset($data['email']);
+        $data['user_id'] = $user->id;
         $data['matric_id'] = $matricId;
 
-        
-        // if (strtolower($data['citizen']) === 'foreign') {
-        //     $localAddress = Address::create([
-        //         'user_id'   => $user->id,
-        //         'address_1' => 'TEMP LOCAL ADDR',
-        //         'address_2' => '-', // add this
-        //     ]);
-
-        //     $foreignAddress = Address::create([
-        //         'user_id'   => $user->id,
-        //         'address_1' => 'TEMP FOREIGN ADDR',
-        //         'address_2' => '-', // add this
-        //     ]);
-
-
-        //     $data['local_address_id'] = $localAddress->id;
-        //     $data['foreign_address_id'] = $foreignAddress->id;
-        // }
-
-        
         return Student::create($data);
     }
+
 }

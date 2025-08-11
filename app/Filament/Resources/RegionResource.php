@@ -97,4 +97,8 @@ class RegionResource extends Resource
             'edit' => Pages\EditRegion::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

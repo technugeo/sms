@@ -111,4 +111,8 @@ class SubregionResource extends Resource
             'edit' => Pages\EditSubregion::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

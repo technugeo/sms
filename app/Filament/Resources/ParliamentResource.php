@@ -73,4 +73,8 @@ class ParliamentResource extends Resource
             'edit' => Pages\EditParliament::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

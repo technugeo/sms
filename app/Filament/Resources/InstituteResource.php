@@ -23,6 +23,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InstituteResource extends Resource
 {
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
+    
     protected static ?string $model = Institute::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -208,5 +213,6 @@ class InstituteResource extends Resource
             static::getUrl() => 'Institutes',
         ];
     }
+
 
 }

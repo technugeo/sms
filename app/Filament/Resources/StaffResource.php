@@ -7,11 +7,16 @@ use App\Filament\Resources\StaffResource\RelationManagers;
 use App\Filament\Resources\StaffResource\RelationManagers\AddressRelationManager;
 
 use App\Models\Staff;
-use App\Models\Designation;
+use App\Models\Institute;
+
 use App\Enum\CitizenEnum;
 use App\Enum\MarriageEnum;
 use App\Enum\GenderEnum;
 use App\Enum\NationalityEnum;
+use App\Enum\RaceEnum;
+use App\Enum\ReligionEnum;
+use App\Enum\RoleEnum;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -51,6 +56,7 @@ class StaffResource extends Resource
                     ->options(NationalityEnum::class),
 
                 Forms\Components\Select::make('citizen')
+                    ->label('Bumiputera')
                     ->required()
                     ->options(CitizenEnum::class),
                 // Forms\Components\TextInput::make('citizen')
@@ -68,20 +74,50 @@ class StaffResource extends Resource
                 // Forms\Components\TextInput::make('address_id')
                 //     ->required()
                 //     ->numeric(),
+
+                Forms\Components\Select::make('race')
+                    ->required()
+                    ->options(RaceEnum::class),
+
+                Forms\Components\Select::make('religion')
+                    ->required()
+                    ->options(ReligionEnum::class),
+                    
+                Forms\Components\Select::make('institute_id')
+                    ->relationship('institute', 'name')
+                    ->required()
+                    ->reactive(),
+                    // ->columnSpanFull(),
+
                 Forms\Components\Select::make('department_id')
-                    ->relationship('department', 'name')
+                    ->label('Department')
                     ->required()
-                    ->reactive(),
-                Forms\Components\Select::make('designation_id')
-                    ->label('Designation')
-                    ->relationship(
-                        name: 'designation',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: fn ($query, $get) => $query->where('department_id', $get('department_id'))
-                    )
+                    ->reactive()
+                    ->options(function (callable $get) {
+                        $instituteId = $get('institute_id');
+                        if (!$instituteId) {
+                            return []; 
+                        }
+                        return \App\Models\Department::where('institute_id', $instituteId)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    }),
+
+                Forms\Components\Select::make('access_level')
                     ->required()
-                    ->disabled(fn (callable $get) => !$get('department_id'))
-                    ->reactive(),
+                    ->options(function () {
+                        return collect([
+                            RoleEnum::NAO,
+                            RoleEnum::AO,
+                            RoleEnum::AA,
+                        ])->mapWithKeys(fn ($role) => [
+                            $role->value => $role->getLabel(),
+                        ])->toArray();
+                    }),
+                Forms\Components\TextInput::make('position'),
+
+
+
 
             ]);
 
@@ -94,23 +130,20 @@ class StaffResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('phone_number')
-                    ->numeric()
+                    ->label('Full Name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nric')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone_number')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('nationality.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nationality_type'),
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 Tables\Columns\TextColumn::make('gender'),
-                Tables\Columns\TextColumn::make('address_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('designation.name')
+                Tables\Columns\TextColumn::make('institute.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('department.name')

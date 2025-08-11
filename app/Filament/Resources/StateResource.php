@@ -134,4 +134,8 @@ class StateResource extends Resource
             'edit' => Pages\EditState::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

@@ -14,21 +14,29 @@ class CreateStaff extends CreateRecord
 
     protected function handleRecordCreation(array $data): Staff
     {
-        // Create the user record
+        // Create the user first
         $user = User::create([
             'name'      => $data['name'],
-            'email'     => $data['email'],
+            'email'     => $data['nric'], // or actual email field
+            'role'      => $data['access_level'],
             'password'  => Hash::make('password'),
             'user_type' => 'Employee',
         ]);
 
-        // Assign the new user's ID to the staff data
+        // Assign user_id to staff data
         $data['user_id'] = $user->id;
 
-        // Remove user-specific fields not present in the 'staff' table
-        unset($data['name'], $data['email']);
+        // Map 'name' to 'full_name' for Staff
+        $data['full_name'] = $data['name'];
 
-        // Create and return the staff record
+        // Provide email for staff if needed
+        $data['email'] = $user->email;
+
+        // Clean up $data
+        unset($data['name']); 
+
+        // Create staff
         return Staff::create($data);
     }
+
 }

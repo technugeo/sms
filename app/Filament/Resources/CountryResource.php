@@ -171,4 +171,8 @@ class CountryResource extends Resource
             'edit' => Pages\EditCountry::route('/{record}/edit'),
         ];
     }
+    public static function canSee(): bool
+    {
+        return auth()->user()->role === 'SA';
+    }
 }

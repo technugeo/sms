@@ -6,6 +6,8 @@ use App\Enum\CitizenEnum;
 use App\Enum\GenderEnum;
 use App\Enum\MarriageEnum;
 use App\Enum\NationalityEnum;
+use App\Enum\RoleEnum;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +20,8 @@ class Staff extends Model implements HasMedia
 
     protected $fillable = [
         'user_id',
+        'full_name',
+        'email',
         'phone_number',
         'nric',
         'nationality_id',
@@ -26,8 +30,12 @@ class Staff extends Model implements HasMedia
         'marriage_status',
         'gender',
         'address_id',
-        'designation_id',
         'department_id',
+        'position',
+        'race',
+        'religion',
+        'institute_id',
+        'access_level',
     ];
 
     protected $casts = [
@@ -65,24 +73,24 @@ class Staff extends Model implements HasMedia
     }
     
 
-    
-    /**
-     * Get Designation
-     * @return BelongsTo
-     */
-    public function designation(): BelongsTo
+    public function institute()
     {
-        return $this->belongsTo(Designation::class);
+        return $this->belongsTo(\App\Models\Institute::class, 'institute_id');
     }
 
     /**
      * Get Department
      * @return BelongsTo
      */
-    public function department(): BelongsTo
+    public function department()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, 'department_id');
     }
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
 
     /**
      * @return void

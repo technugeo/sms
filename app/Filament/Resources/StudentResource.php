@@ -27,6 +27,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StudentResource extends Resource
 {
+    
+    public static function canSee(): bool
+    {
+        return in_array(auth()->user()->role, ['SA', 'AA', 'NAO', 'AO']);
+    }
+
     protected static ?string $model = Student::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -62,7 +68,7 @@ class StudentResource extends Resource
                     ->maxLength(12),
 
                 Forms\Components\TextInput::make('email')
-                    ->email()
+                    ->label('User ID')
                     ->required(),
 
                 Forms\Components\TextInput::make('phone_number')
@@ -194,4 +200,5 @@ class StudentResource extends Resource
     {
         return 0;
     }
+
 }
