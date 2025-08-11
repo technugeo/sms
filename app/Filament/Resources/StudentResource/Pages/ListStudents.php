@@ -14,6 +14,12 @@ class ListStudents extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('import')
+                ->label('Upload Excel')
+                ->url(ImportStudents::getUrl())
+                ->color('success')
+                ->icon('heroicon-o-arrow-up-tray'),
+
         ];
     }
 }

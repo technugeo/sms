@@ -125,6 +125,13 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('nationality_type'),
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
+                
+                Tables\Columns\TextColumn::make('course') 
+                    ->label('Course')
+                    ->formatStateUsing(function ($record) {
+                        return $record->course ? $record->course->prog_code . ' - ' . $record->course->prog_name : null;
+                    }),
+                    
                 Tables\Columns\TextColumn::make('user.status')
                     ->label('Account status'),
                 Tables\Columns\TextColumn::make('academic_status'),
@@ -165,6 +172,7 @@ class StudentResource extends Resource
             'index' => Pages\ListStudents::route('/'),
             'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
+            'import' => Pages\ImportStudents::route('/import'),
         ];
     }
 
@@ -173,7 +181,8 @@ class StudentResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ])
+            ->with('course');  // eager load course relation
     }
 
     public static function getNavigationGroup(): ?string

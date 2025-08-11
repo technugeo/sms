@@ -10,6 +10,7 @@ use Filament\Support\Contracts\HasLabel;
 enum AcademicEnum: string implements HasLabel, HasColor
 {
 
+    case PROSPECT = 'Prospect';
     case REGISTERED = 'Registered';
     case ENROLLED   = 'Enrolled';
     case DEFERRED   = 'Deferred';
@@ -21,6 +22,7 @@ enum AcademicEnum: string implements HasLabel, HasColor
     public function getColor(): string|array|null
     {
         return match ($this) {
+            self::PROSPECT => Color::Gray,
             self::REGISTERED => Color::Gray,
             self::ENROLLED   => Color::Blue,
             self::DEFERRED   => Color::Yellow,
@@ -34,6 +36,7 @@ enum AcademicEnum: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
+            self::PROSPECT => 'Prospect',
             self::REGISTERED => 'Registered',
             self::ENROLLED   => 'Enrolled',
             self::DEFERRED   => 'Deferred',

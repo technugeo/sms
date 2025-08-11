@@ -9,7 +9,7 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ReligionEnum: string implements HasLabel, HasColor
 {
-    case ISLAM   = 'Islam/Muslim';
+    case ISLAM   = 'Islam';
     case BUDDHA = 'Buddha';
     case HINDU = 'Hindu';
     case CHRISTIAN = 'Christian';
@@ -29,7 +29,7 @@ enum ReligionEnum: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::ISLAM  => 'Islam / Muslim',
+            self::ISLAM  => 'Islam',
             self::BUDDHA => 'Buddha',
             self::HINDU => 'Hindu',
             self::CHRISTIAN => 'Christian',
