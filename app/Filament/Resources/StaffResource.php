@@ -27,6 +27,13 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StaffResource extends Resource
 {
+    
+    public static function canAccess(): bool
+    {
+        return auth()->check() && in_array(auth()->user()->role, ['SA', 'AA']);
+    }
+
+
     protected static ?string $model = Staff::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -137,9 +144,9 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('phone_number')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nationality.name')
-                    ->numeric()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('nationality.name')
+                //     ->numeric()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 Tables\Columns\TextColumn::make('gender'),
@@ -149,6 +156,8 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('department.name')
                     ->numeric()
                     ->sortable(),
+                    
+                Tables\Columns\TextColumn::make('access_level'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -184,6 +193,7 @@ class StaffResource extends Resource
             'index' => Pages\ListStaff::route('/'),
             'create' => Pages\CreateStaff::route('/create'),
             'edit' => Pages\EditStaff::route('/{record}/edit'),
+            'import' => Pages\ImportStaffs::route('/import'),
         ];
     }
     public static function getNavigationGroup(): ?string

@@ -89,10 +89,12 @@ class Student extends Model
     }
 
     
-    public function course(): BelongsTo
+    public function course()
     {
-        return $this->belongsTo(Course::class, 'current_course', 'prog_code');
+        return $this->belongsTo(\App\Models\Course::class, 'current_course', 'prog_code');
     }
+
+
     
 
 }

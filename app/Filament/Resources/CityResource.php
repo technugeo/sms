@@ -15,6 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CityResource extends Resource
 {
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'SA';
+    }
+    
     protected static ?string $model = City::class;
 
     protected static ?int $navigationSort = 6;
@@ -138,9 +144,5 @@ class CityResource extends Resource
             'create' => Pages\CreateCity::route('/create'),
             'edit' => Pages\EditCity::route('/{record}/edit'),
         ];
-    }
-    public static function canSee(): bool
-    {
-        return auth()->user()->role === 'SA';
     }
 }

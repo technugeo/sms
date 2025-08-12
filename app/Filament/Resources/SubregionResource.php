@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SubregionResource extends Resource
 {
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'SA';
+    }
+    
     protected static ?string $model = Subregion::class;
 
     protected static ?int $navigationSort = 2;
@@ -111,8 +116,5 @@ class SubregionResource extends Resource
             'edit' => Pages\EditSubregion::route('/{record}/edit'),
         ];
     }
-    public static function canSee(): bool
-    {
-        return auth()->user()->role === 'SA';
-    }
+    
 }

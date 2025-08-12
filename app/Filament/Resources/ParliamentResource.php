@@ -15,6 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ParliamentResource extends Resource
 {
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'SA';
+    }
+    
     protected static ?string $model = Parliament::class;
     protected static ?int $navigationSort = 5;
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
@@ -73,8 +79,5 @@ class ParliamentResource extends Resource
             'edit' => Pages\EditParliament::route('/{record}/edit'),
         ];
     }
-    public static function canSee(): bool
-    {
-        return auth()->user()->role === 'SA';
-    }
+    
 }

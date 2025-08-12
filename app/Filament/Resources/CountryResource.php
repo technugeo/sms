@@ -15,6 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CountryResource extends Resource
 {
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'SA';
+    }
+    
     protected static ?string $model = Country::class;
     protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-flag';
@@ -170,9 +176,5 @@ class CountryResource extends Resource
             'create' => Pages\CreateCountry::route('/create'),
             'edit' => Pages\EditCountry::route('/{record}/edit'),
         ];
-    }
-    public static function canSee(): bool
-    {
-        return auth()->user()->role === 'SA';
     }
 }

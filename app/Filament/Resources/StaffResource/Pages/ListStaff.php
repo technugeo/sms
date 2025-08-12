@@ -14,6 +14,11 @@ class ListStaff extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('import')
+                ->label('Upload Excel')
+                ->url(ImportStaffs::getUrl())
+                ->color('success')
+                ->icon('heroicon-o-arrow-up-tray'),
         ];
     }
 }

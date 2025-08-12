@@ -75,7 +75,7 @@ class Staff extends Model implements HasMedia
 
     public function institute()
     {
-        return $this->belongsTo(\App\Models\Institute::class, 'institute_id');
+        return $this->belongsTo(\App\Models\Institute::class, 'institute_id', 'mqa_institute_id');
     }
 
     /**

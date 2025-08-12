@@ -23,11 +23,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InstituteResource extends Resource
 {
-    public static function canSee(): bool
+    public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->role === 'SA';
+        return auth()->check() && auth()->user()->role === 'SA';
     }
-    
+
     protected static ?string $model = Institute::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

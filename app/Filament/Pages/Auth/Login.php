@@ -5,52 +5,55 @@ use Filament\Pages\Auth\Login as BaseLogin;
 use Filament\Http\Responses\Auth\LoginResponse as DefaultLoginResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Filament\Forms;
 
 class Login extends BaseLogin
 {
-    public ?array $data = null;
+    public ?string $user_id = null;
+    public ?string $password = null;
 
-    public function mount(): void
+    protected function getForms(): array
     {
-        parent::mount();
-        $this->data = [
-            'email' => null,
-            'password' => null,
+        return [
+            'form' => $this->makeForm()
+                ->schema([
+                    Forms\Components\TextInput::make('user_id')
+                        ->label('User ID')
+                        ->required()
+                        ->autocomplete(false)
+                        ->autofocus(),
+
+                    Forms\Components\TextInput::make('password')
+                        ->label(__('Password'))
+                        ->password()
+                        ->required(),
+                ])
+                ->statePath(null), // Top-level properties, not nested in "data"
         ];
     }
 
-
     public function authenticate(): ?DefaultLoginResponse
     {
-        \Log::info('Authenticate method called.');
-
-        try {
-            $credentials = $this->validate([
-                'data.email' => ['required', 'email'],
-                'data.password' => ['required'],
-            ]);
-            \Log::info('Validation passed.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed: ' . json_encode($e->errors()));
-            throw $e; // re-throw after logging
-        }
+        $credentials = $this->validate([
+            'user_id' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
 
         if (! Auth::attempt([
-            'email' => $this->data['email'],
-            'password' => $this->data['password'],
+            'email' => $this->user_id, // Change to your DB column name
+            'password' => $this->password,
         ])) {
             throw ValidationException::withMessages([
-                'data.email' => __('auth.failed'),
+                'user_id' => __('auth.failed'),
             ]);
         }
 
         $user = Auth::user();
-
         $allowedRoles = ['SA', 'AA', 'NAO', 'AO', 'S'];
         if (! in_array($user->role, $allowedRoles)) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'data.email' => 'Unauthorized role',
+                'user_id' => 'Unauthorized role',
             ]);
         }
 

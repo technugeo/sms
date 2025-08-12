@@ -40,6 +40,12 @@ class Course extends Model
         return $this->hasMany(Semester::class, 'prog_code', 'prog_code');
     }
 
+    public function institute()
+    {
+        return $this->belongsTo(\App\Models\Institute::class, 'faculty_id', 'id');
+    }
+
+
 
 
     //
