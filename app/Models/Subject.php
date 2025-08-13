@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Enum\StatusEnum;
-use App\Enum\SubjectTypeEnum;
+use App\Enum\SubjectStatusEnum;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,23 +18,16 @@ class Subject extends Model
     protected $fillable = [
         'subject_code',
         'subject_name',
-        'semester_id',
-        'faculty_code',
-        'prog_code',
-        'subject_type',
-        'status',
+        'semester',
+        'subject_status',
+        'credit_hour',
         'is_core',
+        'status'
     ];
 
     protected $casts = [
-        'subject_type' => SubjectTypeEnum::class,
-        'status' => StatusEnum::class,
+        'subject_status' => SubjectStatusEnum::class,
     ];
-
-    public function semester()
-    {
-        return $this->belongsTo(Semester::class, 'semester_id');
-    }
 
 
 

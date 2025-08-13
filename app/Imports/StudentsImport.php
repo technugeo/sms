@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Enum\AcademicEnum;
 
 class StudentsImport implements ToCollection, WithHeadingRow
 {
@@ -39,6 +41,41 @@ class StudentsImport implements ToCollection, WithHeadingRow
         return $password;
     }
 
+    protected function sendRegistrationEmail(User $user, string $tempPassword): void
+    {
+        $token = Str::uuid();
+
+        DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => $token,
+            'temp_hash_password' => Hash::make($tempPassword),
+            'temp_password'      => $tempPassword,
+            'is_active'          => 'yes',
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        $link = url('/login?token=' . $token);
+
+        Mail::raw("
+        Thank you for registering with us.
+
+        Below are your login credentials:
+
+        Student name: {$user->name}
+        User ID: {$user->email}
+        Temporary Password: {$tempPassword}
+        Link: {$link}
+
+        Thank you,
+        SMS Support Team
+        ", function ($message) use ($user) {
+            $message->to('aishah@nugeosolutions.com') 
+                    ->subject('Your SMS Account Credentials');
+        });
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
@@ -46,49 +83,31 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Generate temp password and hash it
+            // Generate temp password
             $tempPassword = $this->generateTempPassword();
-            $hashedTempPassword = Hash::make($tempPassword);
 
-            // Create user first with original email temporarily
+            // Create user first
             $user = User::create([
                 'name'         => $row['full_name'],
-                'email'        => $row['email'], // temporary email
+                'email'        => $row['email'], // temporary, will be matricId later
                 'profile_type' => Student::class,
                 'role'         => 'S',
-                'password'     => $hashedTempPassword,
+                'password'     => Hash::make($tempPassword),
             ]);
 
             // Prepare matric_id
             $course = Course::where('prog_code', $row['course_code'])->first();
-            $progCode = $course ? $course->prog_code : '00';
-            $progCode = str_pad($progCode, 2, '0', STR_PAD_LEFT);
-
+            $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '00';
             $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
-
-            $intakeYear = $row['intake_year'];
-            $intakeMonth = $row['intake_month'];
-            $intake = substr($intakeYear, 2, 2) . $this->convertMonthNameToNumber($intakeMonth);
-
+            $intake = substr($row['intake_year'], 2, 2) . $this->convertMonthNameToNumber($row['intake_month']);
             $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-            // Update user email to matricId
+            // Update user's email to matricId
             $user->email = $matricId;
             $user->save();
 
-            // Insert password reset token record using matricId as email
-            DB::table('password_reset_tokens')->insert([
-                'user_id'            => $user->id,
-                'email'              => $matricId,
-                'token'              => Str::uuid(),
-                'temp_hash_password' => $hashedTempPassword,
-                'temp_password'      => $tempPassword,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ]);
-
-            // Now create the student with user_id and matric_id attached
-            Student::create([
+            // Create student
+            $student = Student::create([
                 'user_id'          => $user->id,
                 'matric_id'        => $matricId,
                 'current_course'   => $row['course_code'],
@@ -96,7 +115,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 'intake_year'      => $row['intake_year'],
                 'full_name'        => $row['full_name'],
                 'nric'             => $row['nric'],
-                'email'            => $row['email'], // optional: can keep original email here
+                'email'            => $row['email'], // optional: original email
                 'phone_number'     => $row['phone_number'],
                 'nationality'      => $row['nationality'],
                 'passport_no'      => $row['passport_no'] ?? null,
@@ -108,6 +127,11 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 'nationality_type' => $row['nationality_type'],
                 'academic_status'  => $row['academic_status'],
             ]);
+
+            // Send email if academic_status is 'Registered'
+            if (isset($row['academic_status']) && $row['academic_status'] === AcademicEnum::REGISTERED->value) {
+                $this->sendRegistrationEmail($user, $tempPassword);
+            }
         }
     }
 }

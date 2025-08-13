@@ -6,33 +6,89 @@ use App\Filament\Resources\StaffResource;
 use App\Models\Staff;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
+
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+
 
 class CreateStaff extends CreateRecord
 {
     protected static string $resource = StaffResource::class;
 
+    /**
+     * Generate a random temporary password.
+     */
+    protected function generateTempPassword(int $length = 12): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $password = '';
+        $maxIndex = strlen($chars) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+
     protected function handleRecordCreation(array $data): Staff
     {
-        // Create the user first
+        // Generate temp password
+        $tempPassword = $this->generateTempPassword();
+
+        // Hash temp password
+        $hashedTempPassword = Hash::make($tempPassword);
+
+        // Create the user first (email = NRIC)
         $user = User::create([
             'name'      => $data['name'],
-            'email'     => $data['nric'], // or actual email field
+            'email'     => $data['nric'], 
             'role'      => $data['access_level'],
-            'password'  => Hash::make('password'),
+            'password'  => $hashedTempPassword,
             'user_type' => 'Employee',
         ]);
 
-        // Assign user_id to staff data
-        $data['user_id'] = $user->id;
+        // Generate reset token
+        $token = Str::uuid();
 
-        // Map 'name' to 'full_name' for Staff
+        // Insert password reset token record
+        \DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => $token,
+            'temp_hash_password' => $hashedTempPassword,
+            'temp_password'      => $tempPassword,
+            'is_active'          => 'yes', 
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        // Build force password reset link
+        $link = url('/login?token=' . $token);
+
+        // Send email with credentials to actual email entered in form
+        Mail::raw("
+        Thank you for registering with us.
+
+        Below are your login credentials:
+
+        User ID: {$user->email}
+        Temporary Password: {$tempPassword}
+        Access Role: {$user->role}
+        Link: {$link}
+
+        Thank you,
+        SMS Support Team
+        ", function ($message) use ($data) {
+            $message->to('aishah@nugeosolutions.com') 
+                    ->subject('Your SMS Account Credentials');
+        });
+
+        $data['user_id']   = $user->id;
         $data['full_name'] = $data['name'];
+        $data['email']     = $user->email;
 
-        // Provide email for staff if needed
-        $data['email'] = $user->email;
-
-        // Clean up $data
         unset($data['name']); 
 
         // Create staff

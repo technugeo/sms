@@ -68,7 +68,7 @@ class StudentResource extends Resource
                     ->maxLength(12),
 
                 Forms\Components\TextInput::make('email')
-                    ->label('User ID')
+                    ->label('Email')
                     ->required(),
 
                 Forms\Components\TextInput::make('phone_number')

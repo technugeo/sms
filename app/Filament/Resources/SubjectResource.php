@@ -7,8 +7,8 @@ use App\Filament\Resources\SubjectResource\RelationManagers;
 
 use App\Models\Subject;
 
+use App\Enum\SubjectStatusEnum;
 use App\Enum\StatusEnum;
-use App\Enum\SubjectTypeEnum;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -21,6 +21,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SubjectResource extends Resource
 {
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'SA';
+    }
+
     protected static ?string $model = Subject::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -36,12 +41,17 @@ class SubjectResource extends Resource
                     ->label('Subject Name')
                     ->required()
                     ->maxLength(200),
-                Forms\Components\TextInput::make('semester_id')
+                Forms\Components\TextInput::make('semester')
                     ->numeric()
-                    ->required(),
-                Forms\Components\Select::make('subject_type')
                     ->required()
-                    ->options(SubjectTypeEnum::class),
+                    ->maxlength(1),
+                Forms\Components\TextInput::make('credit_hour')
+                    ->numeric()
+                    ->required()
+                    ->maxlength(1),
+                Forms\Components\Select::make('subject_status')
+                    ->required()
+                    ->options(SubjectStatusEnum::class),
                 Forms\Components\Select::make('status')
                     ->required()
                     ->options(StatusEnum::class),
@@ -52,22 +62,34 @@ class SubjectResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('semester_id')
+                Tables\Columns\TextColumn::make('semester')
+                    ->formatStateUsing(fn ($state) => 'Semester ' . $state)
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('subject_code')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('subject_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('subject_type'),
+
+                Tables\Columns\TextColumn::make('credit_hour'),
+
+                Tables\Columns\TextColumn::make('subject_status')
+                    ->formatStateUsing(fn ($state) => strtoupper($state->value ?? (string) $state)),
+
+
                 Tables\Columns\TextColumn::make('status'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -86,6 +108,7 @@ class SubjectResource extends Resource
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
+
     }
 
     public static function getRelations(): array
@@ -101,6 +124,7 @@ class SubjectResource extends Resource
             'index' => Pages\ListSubjects::route('/'),
             'create' => Pages\CreateSubject::route('/create'),
             'edit' => Pages\EditSubject::route('/{record}/edit'),
+            'import' => Pages\ImportSubjects::route('/import'),
         ];
     }
 
@@ -112,14 +136,10 @@ class SubjectResource extends Resource
             ]);
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
     
     public static function getNavigationGroup(): ?string
     {
-        return 'Management';
+        return 'Data Configuration';
     }
     public static function getNavigationSort(): ?int
     {

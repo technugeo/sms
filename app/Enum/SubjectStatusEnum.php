@@ -8,9 +8,9 @@ use Filament\Support\Contracts\HasLabel;
 
 enum SubjectStatusEnum: string implements HasLabel
 {
-    case DISCIPLINE = 'Discipline';
-    case COMMON = 'Common';
-    case MPU = 'Mpu';
+    case DISCIPLINE = 'DISCIPLINE';
+    case COMMON = 'COMMON';
+    case MPU = 'MPU';
     case LI = 'L.I';
 
 

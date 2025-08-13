@@ -14,6 +14,11 @@ class ListSubjects extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('import')
+                ->label('Upload Excel')
+                ->url(ImportSubjects::getUrl())
+                ->color('success')
+                ->icon('heroicon-o-arrow-up-tray'),
         ];
     }
 }

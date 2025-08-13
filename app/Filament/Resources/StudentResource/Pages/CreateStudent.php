@@ -5,10 +5,10 @@ namespace App\Filament\Resources\StudentResource\Pages;
 use App\Filament\Resources\StudentResource;
 use App\Models\Student;
 use App\Models\User;
-use App\Models\Address;
 use App\Models\Course;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CreateStudent extends CreateRecord
@@ -40,57 +40,77 @@ class CreateStudent extends CreateRecord
         return $password;
     }
 
+    protected function sendRegistrationEmail(User $user, string $tempPassword): void
+    {
+        // Insert password reset token record
+        $token = Str::uuid();
+        \DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => $token,
+            'temp_hash_password' => Hash::make($tempPassword),
+            'temp_password'      => $tempPassword,
+            'is_active'          => 'yes',
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        $link = url('/login?token=' . $token);
+
+        Mail::raw("
+        Thank you for registering with us.
+
+        Below are your login credentials:
+
+        User ID: {$user->email}
+        Temporary Password: {$tempPassword}
+        Link: {$link}
+
+        Thank you,
+        SMS Support Team
+        ", function ($message) use ($user) {
+            $message->to('aishah@nugeosolutions.com') 
+                    ->subject('Your SMS Account Credentials');
+        });
+    }
+
     protected function handleRecordCreation(array $data): Student
     {
         // Generate temp password
         $tempPassword = $this->generateTempPassword();
 
-        // Hash temp password
-        $hashedTempPassword = Hash::make($tempPassword);
-
-        // Create user first with original email temporarily
+        // Create user with temporary email (will be matricId later)
         $user = User::create([
             'name'         => $data['full_name'],
-            'email'        => $data['email'], // temporary, will update after matricId generation
+            'email'        => $data['email'], 
             'profile_type' => Student::class,
             'role'         => 'S',
-            'password'     => $hashedTempPassword,
+            'password'     => Hash::make($tempPassword),
         ]);
 
-        // Now generate matricId using $user->id
+        // Generate matricId
         $course = Course::where('prog_code', $data['current_course'])->first();
-        $progCode = $course ? $course->prog_code : '00';
-        $progCode = str_pad($progCode, 2, '0', STR_PAD_LEFT);
-
+        $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '00';
         $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
-
-        $intakeYear = $data['intake_year'];
-        $intakeMonth = $data['intake_month'];
-        $intake = substr($intakeYear, 2, 2) . $this->convertMonthNameToNumber($intakeMonth);
-
+        $intake = substr($data['intake_year'], 2, 2) . $this->convertMonthNameToNumber($data['intake_month']);
         $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-        // Update user email to matricId
+        // Update user's email to matricId
         $user->email = $matricId;
         $user->save();
-
-        // Insert password reset token record using matricId as email
-        \DB::table('password_reset_tokens')->insert([
-            'user_id'            => $user->id,
-            'email'              => $matricId,
-            'token'              => \Str::uuid(),
-            'temp_hash_password' => $hashedTempPassword,
-            'temp_password'      => $tempPassword,
-            'created_at'         => now(),
-            'updated_at'         => now(),
-        ]);
 
         // Prepare student data
         unset($data['email']);
         $data['user_id'] = $user->id;
         $data['matric_id'] = $matricId;
 
-        return Student::create($data);
-    }
+        $student = Student::create($data);
 
+        // Send registration email only if academic_status is 'Registered'
+        if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
+            $this->sendRegistrationEmail($user, $tempPassword);
+        }
+
+        return $student;
+    }
 }

@@ -16,12 +16,11 @@ return new class extends Migration
             $table->id();
             $table->string('subject_code');
             $table->string('subject_name');
-            $table->string('prog_code');
-            $table->string('faculty_code');
-            $table->integer('semester_id');
-            $table->string('subject_type');
+            $table->integer('semester');
+            $table->integer('credit_hour');
             $table->string('is_core');
-            $table->string('status')->nullable();
+            $table->string('subject_status')->nullable();
+            $table->string('status');
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('deleted_by');
