@@ -7,6 +7,7 @@ use App\Filament\Resources\StudentResource\RelationManagers;
 
 use App\Models\Student;
 use App\Models\Country;
+use App\Models\StudentGuardian;
 
 use App\Enum\CitizenEnum;
 use App\Enum\MarriageEnum;
@@ -169,6 +170,8 @@ class StudentResource extends Resource
         return [
             RelationManagers\LocalAddressRelationManager::class,
             RelationManagers\ForeignAddressRelationManager::class,
+            RelationManagers\GuardianRelationManager::class,
+            RelationManagers\EmergencyContactRelationManager::class,
         ];
     }
 

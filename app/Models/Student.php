@@ -94,6 +94,15 @@ class Student extends Model
         return $this->belongsTo(\App\Models\Course::class, 'current_course', 'prog_code');
     }
 
+    public function studentGuardians()
+    {
+        return $this->hasMany(\App\Models\StudentGuardian::class, 'matric_id', 'matric_id');
+    }
+    public function emergencyContacts(): HasMany
+    {
+        return $this->hasMany(StudentEmergencyContact::class, 'matric_id', 'matric_id');
+    }
+
 
     
 
