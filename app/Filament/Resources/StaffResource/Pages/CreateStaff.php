@@ -67,7 +67,7 @@ class CreateStaff extends CreateRecord
         // Build force password reset link
         $link = url('/login?token=' . $token);
 
-        // Send email with credentials to actual email entered in form
+        // Send email with credentials to actual email entered in formmm
         Mail::raw("
         Thank you for registering with us.
 
