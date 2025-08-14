@@ -26,7 +26,10 @@ class Institute extends Model
         'district', 
         'dun', 
         'parliament', 
-        'status',        
+        'status',       
+        'created_by', 
+        'updated_by', 
+        'deleted_by', 
     ];
 
     protected $casts = [
@@ -63,8 +66,9 @@ class Institute extends Model
 
     public function departments()
     {
-        return $this->hasMany(Department::class, 'institute_id');
+        return $this->hasMany(Department::class, 'institute_id', 'mqa_institute_id');
     }
+
         
 
     //

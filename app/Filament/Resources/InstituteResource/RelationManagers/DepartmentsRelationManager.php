@@ -7,8 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Department;
 
 class DepartmentsRelationManager extends RelationManager
 {
@@ -18,17 +17,14 @@ class DepartmentsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                // Forms\Components\Select::make('institute_id')
-                //     ->relationship('institute', 'name') 
-                //     ->required()
-                //     ->reactive()
-                //     ->columnSpanFull(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\TextInput::make('code')
                     ->required()
                     ->maxLength(4),
+
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
@@ -40,9 +36,6 @@ class DepartmentsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                // Tables\Columns\TextColumn::make('institute.name')
-                //     ->label('Institute')
-                //     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Department')
                     ->searchable(),
@@ -56,22 +49,21 @@ class DepartmentsRelationManager extends RelationManager
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->using(function (array $data, RelationManager $livewire) {
+                        // Manually create Department with mqa_institute_id as FK
+                        return Department::create([
+                            'institute_id' => $livewire->ownerRecord->mqa_institute_id,
+                            'name'         => $data['name'],
+                            'code'         => $data['code'],
+                            'description'  => $data['description'],
+                        ]);
+                    }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->url(fn ($record) => route('filament.admin.resources.departments.view', $record))
-                    ->openUrlInNewTab(false), // or true if you want it in a new tab
-
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

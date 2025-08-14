@@ -64,26 +64,26 @@ class CreateStaff extends CreateRecord
             'updated_at'         => now(),
         ]);
 
-        // Build force password reset link
+        
         $link = url('/login?token=' . $token);
 
-        // Send email with credentials to actual email entered in formmm
-        Mail::raw("
-        Thank you for registering with us.
+        
+        // Mail::raw("
+        // Thank you for registering with us.
 
-        Below are your login credentials:
+        // Below are your login credentials:
 
-        User ID: {$user->email}
-        Temporary Password: {$tempPassword}
-        Access Role: {$user->role}
-        Link: {$link}
+        // User ID: {$user->email}
+        // Temporary Password: {$tempPassword}
+        // Access Role: {$user->role}
+        // Link: {$link}
 
-        Thank you,
-        SMS Support Team
-        ", function ($message) use ($data) {
-            $message->to('aishah@nugeosolutions.com') 
-                    ->subject('Your SMS Account Credentials');
-        });
+        // Thank you,
+        // SMS Support Team
+        // ", function ($message) use ($data) {
+        //     $message->to('aishah@nugeosolutions.com') 
+        //             ->subject('Your SMS Account Credentials');
+        // });
 
         $data['user_id']   = $user->id;
         $data['full_name'] = $data['name'];

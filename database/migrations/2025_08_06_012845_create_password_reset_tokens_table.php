@@ -12,9 +12,14 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('category_institute', function (Blueprint $table) {
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('category');
+            $table->integer('user_id');
+            $table->string('email');
+            $table->string('token');
+            $table->string('temp_hash_password');
+            $table->string('password');
+            $table->string('is_active');
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('deleted_by');
@@ -28,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_institute');
+        Schema::dropIfExists('password_reset_tokens');
     }
 };
