@@ -14,6 +14,7 @@ return new class extends Migration
 
         Schema::create('student', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id');
             $table->string('matric_id');
             $table->string('nric', 12)->unique();
             $table->string('passport_no')->nullable();

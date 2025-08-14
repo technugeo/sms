@@ -44,6 +44,7 @@ class Course extends Model
     {
         return $this->belongsTo(\App\Models\Institute::class, 'faculty_id', 'id');
     }
+    
 
 
 

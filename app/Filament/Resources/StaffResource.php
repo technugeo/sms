@@ -8,6 +8,7 @@ use App\Filament\Resources\StaffResource\RelationManagers\AddressRelationManager
 
 use App\Models\Staff;
 use App\Models\Institute;
+use App\Models\Country;
 
 use App\Enum\CitizenEnum;
 use App\Enum\MarriageEnum;
@@ -58,6 +59,12 @@ class StaffResource extends Resource
                     ->maxLength(12),
 
                 
+                Forms\Components\Select::make('nationality')
+                    ->label('Nationality')
+                    ->options(Country::pluck('name', 'name')->toArray())
+                    ->required()
+                    ->searchable(),
+
                 Forms\Components\Select::make('nationality_type')
                     ->required()
                     ->options(NationalityEnum::class),
@@ -116,7 +123,6 @@ class StaffResource extends Resource
                         return collect([
                             RoleEnum::NAO,
                             RoleEnum::AO,
-                            RoleEnum::AA,
                         ])->mapWithKeys(fn ($role) => [
                             $role->value => $role->getLabel(),
                         ])->toArray();
@@ -144,9 +150,7 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('phone_number')
                     ->numeric()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('nationality.name')
-                //     ->numeric()
-                //     ->sortable(),
+
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 Tables\Columns\TextColumn::make('gender'),

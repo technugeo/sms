@@ -64,6 +64,9 @@ class DepartmentsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->url(fn ($record) => route('filament.admin.resources.departments.view', $record))
+                    ->openUrlInNewTab(false), // or true if you want it in a new tab
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

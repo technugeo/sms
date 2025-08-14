@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\StudentResource\RelationManagers;
 
+use App\Enum\GuardianEnum;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables;
@@ -21,8 +23,9 @@ class EmergencyContactRelationManager extends RelationManager
                 Forms\Components\TextInput::make('full_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('relationship')
-                    ->maxLength(255),
+                Forms\Components\Select::make('relationship')
+                    ->required()
+                    ->options(GuardianEnum::class),
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
                     ->maxLength(12),

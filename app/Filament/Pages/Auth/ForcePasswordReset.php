@@ -27,9 +27,9 @@ class ForcePasswordReset extends ResetPassword
         parent::mount($email, $token);
 
         // Use session and URL parameters to set user_email and token
-        $sessionForceReset = Session::get('force_password_reset');
-        $sessionEmail = Session::get('force_password_reset_email');
-        $sessionToken = Session::get('force_password_reset_token');
+        $sessionForceReset = Session::get('force_password_reset_tokens');
+        $sessionEmail = Session::get('force_password_reset_tokens_email');
+        $sessionToken = Session::get('force_password_reset_tokens_token');
 
         \Log::info('ForcePasswordReset mount called', [
             'email_param' => $email,
@@ -139,8 +139,8 @@ class ForcePasswordReset extends ResetPassword
             ]);
         }
 
-        // Manual token validation against your password_reset table
-        $hasActiveToken = DB::table('password_reset')
+        // Manual token validation against your password_reset_tokens table
+        $hasActiveToken = DB::table('password_reset_tokens')
             ->where('email', $user->email)
             ->where('token', $this->token)
             ->where('is_active', 'yes')
@@ -164,17 +164,17 @@ class ForcePasswordReset extends ResetPassword
         ]);
 
         // Mark token as inactive
-        DB::table('password_reset')
+        DB::table('password_reset_tokens')
             ->where('email', $user->email)
             ->where('token', $this->token)
             ->update(['is_active' => 'no']);
 
         // Clear session keys related to force reset
         Session::forget([
-            'force_password_reset',
-            'force_password_reset_email',
-            'force_password_reset_user_id',
-            'force_password_reset_token',
+            'force_password_reset_tokens',
+            'force_password_reset_tokens_email',
+            'force_password_reset_tokens_user_id',
+            'force_password_reset_tokens_token',
         ]);
 
         // Redirect to login page after successful reset

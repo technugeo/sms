@@ -16,14 +16,11 @@ return new class extends Migration
             $table->id();
             $table->string('subject_code');
             $table->string('subject_name');
-            $table->integer('semester');
+            $table->integer('semester')->default(0);
             $table->integer('credit_hour');
-            $table->string('is_core');
+            $table->string('is_core')->nullable();
             $table->string('subject_status')->nullable();
-            $table->string('status');
-            $table->integer('created_by');
-            $table->integer('updated_by');
-            $table->integer('deleted_by');
+            $table->enum('status', ['yes', 'no'])->default('yes');
             $table->timestamps();
             $table->softDeletes();
         });

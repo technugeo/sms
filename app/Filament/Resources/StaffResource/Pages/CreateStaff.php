@@ -34,20 +34,16 @@ class CreateStaff extends CreateRecord
 
     protected function handleRecordCreation(array $data): Staff
     {
-        // Generate temp password
         $tempPassword = $this->generateTempPassword();
-
-        // Hash temp password
         $hashedTempPassword = Hash::make($tempPassword);
 
-        // Create the user first (email = NRIC)
         $user = User::create([
-            'name'      => $data['name'],
-            'email'     => $data['nric'], 
-            'role'      => $data['access_level'],
-            'password'  => $hashedTempPassword,
-            'user_type' => 'Employee',
-            'profile_type' => 'App\Models\Staff',
+            'name'         => $data['name'],
+            'email'        => $data['nric'], 
+            'role'         => $data['access_level'],
+            'password'     => $hashedTempPassword,
+            'user_type'    => 'Employee',
+            'profile_type' => 'App\\Models\\Staff', 
         ]);
 
         // Generate reset token
@@ -55,16 +51,16 @@ class CreateStaff extends CreateRecord
 
         // Insert password reset token record
 
-        // \DB::table('password_reset')->insert([
-        //     'user_id'            => $user->id,
-        //     'email'              => $user->email,
-        //     'token'              => $token,
-        //     'temp_hash_password' => $hashedTempPassword,
-        //     'temp_password'      => $tempPassword,
-        //     'is_active'          => 'yes', 
-        //     'created_at'         => now(),
-        //     'updated_at'         => now(),
-        // ]);
+        \DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => $token,
+            'temp_hash_password' => $hashedTempPassword,
+            'password'      => $tempPassword,
+            'is_active'          => 'yes', 
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
 
         
         $link = url('/login?token=' . $token);
@@ -87,14 +83,16 @@ class CreateStaff extends CreateRecord
         //             ->subject('Your SMS Account Credentials');
         // });
 
+
         $data['user_id']   = $user->id;
         $data['full_name'] = $data['name'];
         $data['email']     = $user->email;
+        $data['nationality'] = $data['nationality'] ?? 'Malaysia'; 
 
         unset($data['name']); 
 
-        // Create staff
         return Staff::create($data);
     }
+
 
 }

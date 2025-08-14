@@ -45,7 +45,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
     {
         $token = Str::uuid();
 
-        DB::table('password_reset')->insert([
+        DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
             'token'              => $token,
@@ -56,24 +56,24 @@ class StudentsImport implements ToCollection, WithHeadingRow
             'updated_at'         => now(),
         ]);
 
-        $link = url('/login?token=' . $token);
+        // $link = url('/login?token=' . $token);
 
-        Mail::raw("
-        Thank you for registering with us.
+        // Mail::raw("
+        // Thank you for registering with us.
 
-        Below are your login credentials:
+        // Below are your login credentials:
 
-        Student name: {$user->name}
-        User ID: {$user->email}
-        Temporary Password: {$tempPassword}
-        Link: {$link}
+        // Student name: {$user->name}
+        // User ID: {$user->email}
+        // Temporary Password: {$tempPassword}
+        // Link: {$link}
 
-        Thank you,
-        SMS Support Team
-        ", function ($message) use ($user) {
-            $message->to('aishah@nugeosolutions.com') 
-                    ->subject('Your SMS Account Credentials');
-        });
+        // Thank you,
+        // SMS Support Team
+        // ", function ($message) use ($user) {
+        //     $message->to('aishah@nugeosolutions.com') 
+        //             ->subject('Your SMS Account Credentials');
+        // });
     }
 
     public function collection(Collection $rows)

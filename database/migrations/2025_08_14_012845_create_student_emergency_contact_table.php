@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('password_reset_tokens_tokens', function (Blueprint $table) {
+        Schema::create('student_emergency_contact', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->string('email');
-            $table->string('token');
-            $table->string('temp_hash_password');
-            $table->string('password');
-            $table->string('is_active');
+            $table->string('matric_id');
+            $table->string('relationship')->nullable();
+            $table->string('full_name');
+            $table->string('address');
+            $table->string('phone_number');
+            $table->string('alt_phone_number');
+
+            $table->enum('is_primary', ['yes', 'no'])->default('yes');
+
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('deleted_by');
@@ -33,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('password_reset_tokens_tokens');
+        Schema::dropIfExists('student_emergency_contact');
     }
 };

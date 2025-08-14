@@ -40,17 +40,19 @@ class StaffsImport implements ToCollection, WithHeadingRow
             $tempPassword = $this->generateTempPassword();
             $hashedTempPassword = Hash::make($tempPassword);
 
+            
             $user = User::create([
-                'name'      => $row['full_name'],
-                'email'     => $row['nric'],
-                'role'      => $row['access_level'] ?? 'staff',
-                'password'  => $hashedTempPassword,
-                'user_type' => 'Employee',
+                'name'         => $row['full_name'],
+                'email'        => $row['nric'],
+                'role'         => $row['access_level'],
+                'password'     => $hashedTempPassword,
+                'user_type'    => 'Employee',
+                'profile_type' => 'App\\Models\\Staff',
             ]);
 
             $token = Str::uuid();
 
-            DB::table('password_reset')->insert([
+            DB::table('password_reset_tokens')->insert([
                 'user_id'            => $user->id,
                 'email'              => $user->email,
                 'token'              => $token,
@@ -64,25 +66,26 @@ class StaffsImport implements ToCollection, WithHeadingRow
             $link = url('/login?token=' . $token);
 
             // For testing, send all emails to your own address
-            $testingEmail = 'your_email@example.com'; // replace with your email
+            // $testingEmail = 'your_email@example.com'; // replace with your email
 
-            Mail::raw("
-            Thank you for registering with us.
+            // Mail::raw("
+            // Thank you for registering with us.
 
-            Below are your login credentials:
+            // Below are your login credentials:
 
-            User ID: {$user->email}
-            Temporary Password: {$tempPassword}
-            Access Role: {$user->role}
-            Link: {$link}
+            // User ID: {$user->email}
+            // Temporary Password: {$tempPassword}
+            // Access Role: {$user->role}
+            // Link: {$link}
 
-            Thank you,
-            SMS Support Team
-            ", function ($message) use ($testingEmail) {
-                $message->to('aishah@nugeosolutions.com') 
-                        ->subject('Your SMS Account Credentials (TEST)');
-            });
+            // Thank you,
+            // SMS Support Team
+            // ", function ($message) use ($testingEmail) {
+            //     $message->to('aishah@nugeosolutions.com') 
+            //             ->subject('Your SMS Account Credentials (TEST)');
+            // });
 
+            
             Staff::create([
                 'user_id'          => $user->id,
                 'institute_id'     => $row['mqa_institute_id'] ?? null,
@@ -97,11 +100,11 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'race'             => $row['race'] ?? null,
                 'religion'         => $row['religion'] ?? null,
                 'citizen'          => $row['citizen'] ?? null,
+                'nationality'      => $row['nationality'] ?? 'Malaysia', 
                 'nationality_type' => $row['nationality_type'] ?? null,
                 'access_level'     => $row['access_level'] ?? null,
                 'position'         => $row['position'] ?? null,
             ]);
         }
     }
-
 }

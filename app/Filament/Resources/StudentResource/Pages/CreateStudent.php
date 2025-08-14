@@ -44,7 +44,7 @@ class CreateStudent extends CreateRecord
     {
         // Insert password reset token record
         $token = Str::uuid();
-        \DB::table('password_reset')->insert([
+        \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
             'token'              => $token,
@@ -55,23 +55,23 @@ class CreateStudent extends CreateRecord
             'updated_at'         => now(),
         ]);
 
-        $link = url('/login?token=' . $token);
+        // $link = url('/login?token=' . $token);
 
-        Mail::raw("
-        Thank you for registering with us.
+        // Mail::raw("
+        // Thank you for registering with us.
 
-        Below are your login credentials:
+        // Below are your login credentials:
 
-        User ID: {$user->email}
-        Temporary Password: {$tempPassword}
-        Link: {$link}
+        // User ID: {$user->email}
+        // Temporary Password: {$tempPassword}
+        // Link: {$link}
 
-        Thank you,
-        SMS Support Team
-        ", function ($message) use ($user) {
-            $message->to('aishah@nugeosolutions.com') 
-                    ->subject('Your SMS Account Credentials');
-        });
+        // Thank you,
+        // SMS Support Team
+        // ", function ($message) use ($user) {
+        //     $message->to('aishah@nugeosolutions.com') 
+        //             ->subject('Your SMS Account Credentials');
+        // });
     }
 
     protected function handleRecordCreation(array $data): Student

@@ -73,17 +73,17 @@ class Login extends BaseLogin
         ]);
 
         if ($this->token) {
-            $hasActiveToken = DB::table('password_reset')
+            $hasActiveToken = DB::table('password_reset_tokens')
                 ->where('email', $user->email)
                 ->where('is_active', 'yes')
                 ->exists();
 
             if (is_null($user->email_verified) && $user->is_active == 0 && $hasActiveToken) {
                 session([
-                    'force_password_reset' => true,
-                    'force_password_reset_email' => $user->email,
-                    'force_password_reset_user_id' => $user->id,
-                    'force_password_reset_token' => $this->token,
+                    'force_password_reset_tokens' => true,
+                    'force_password_reset_tokens_email' => $user->email,
+                    'force_password_reset_tokens_user_id' => $user->id,
+                    'force_password_reset_tokens_token' => $this->token,
                 ]);
 
                 Auth::logout();

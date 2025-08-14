@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('nric', 12)->unique();
             
             $table->string('nationality');
+            $table->unsignedBigInteger('profile_id')->default(1);
 
             $table->enum('nationality_type',array_column(\App\Enum\NationalityEnum::cases(), 'value'));
             $table->enum('citizen',array_column(\App\Enum\CitizenEnum::cases(), 'value'));

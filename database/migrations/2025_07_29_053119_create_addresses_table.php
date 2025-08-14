@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('address_1');
             $table->string('address_2')->nullable();
             $table->string('address_3')->nullable();
+            $table->string('address_type');
             $table->integer('postcode');
             $table->unsignedMediumInteger('country_id');
             $table->unsignedMediumInteger('state_id');

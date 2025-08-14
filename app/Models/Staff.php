@@ -24,7 +24,7 @@ class Staff extends Model implements HasMedia
         'email',
         'phone_number',
         'nric',
-        'nationality_id',
+        'nationality',
         'nationality_type',
         'citizen',
         'marriage_status',

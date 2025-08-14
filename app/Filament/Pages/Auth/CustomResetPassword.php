@@ -43,7 +43,7 @@ class CustomResetPassword extends ResetPassword
             }
         );
 
-        if ($status == Password::PASSWORD_RESET) {
+        if ($status == Password::password_reset_tokens) {
             return redirect()->route('filament.admin.auth.login')->with('success', 'Password reset successfully.');
         }
 

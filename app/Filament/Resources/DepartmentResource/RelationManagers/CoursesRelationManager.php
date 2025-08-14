@@ -4,7 +4,6 @@ namespace App\Filament\Resources\DepartmentResource\RelationManagers;
 
 use App\Enum\ProgrammeEnum;
 use App\Enum\StatusEnum;
-
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -24,6 +23,7 @@ class CoursesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('prog_code')
                     ->label('Course Code')
                     ->required(),
+
                 Forms\Components\TextInput::make('prog_name')
                     ->label('Course Name')
                     ->required()
@@ -49,11 +49,8 @@ class CoursesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('prog_name')
             ->columns([
-                // Tables\Columns\TextColumn::make('department.name')
-                //     ->label('Department/Faculty')
-                //     ->searchable(),
                 Tables\Columns\TextColumn::make('prog_code')
                     ->label('Course Code')
                     ->searchable(),
@@ -81,16 +78,22 @@ class CoursesRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['faculty_id'] = $this->ownerRecord->faculty_id ?? null;
+                        $data['created_by'] = auth()->id();
+                        return $data;
+                    })
+                    ->using(function (array $data) {
+                        return $this->getRelationship()->create($data);
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->url(fn ($record) => route('filament.admin.resources.courses.view', $record))
-                    ->openUrlInNewTab(false), 
+                    ->openUrlInNewTab(false),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
