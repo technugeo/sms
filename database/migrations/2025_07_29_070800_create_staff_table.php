@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('user_id');
 
             $table->string('nric', 12)->unique();
-            $table->foreignId('nationality_id')->constrained('nationalities')->restrictOnDelete();
+            
+            $table->string('nationality');
 
             $table->enum('nationality_type',array_column(\App\Enum\NationalityEnum::cases(), 'value'));
             $table->enum('citizen',array_column(\App\Enum\CitizenEnum::cases(), 'value'));

@@ -15,9 +15,9 @@ return new class extends Migration
         Schema::create('category_institute', function (Blueprint $table) {
             $table->id();
             $table->string('category');
-            $table->integer('created_by');
-            $table->integer('updated_by');
-            $table->integer('deleted_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

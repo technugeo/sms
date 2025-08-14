@@ -47,22 +47,24 @@ class CreateStaff extends CreateRecord
             'role'      => $data['access_level'],
             'password'  => $hashedTempPassword,
             'user_type' => 'Employee',
+            'profile_type' => 'App\Models\Staff',
         ]);
 
         // Generate reset token
         $token = Str::uuid();
 
         // Insert password reset token record
-        \DB::table('password_reset')->insert([
-            'user_id'            => $user->id,
-            'email'              => $user->email,
-            'token'              => $token,
-            'temp_hash_password' => $hashedTempPassword,
-            'temp_password'      => $tempPassword,
-            'is_active'          => 'yes', 
-            'created_at'         => now(),
-            'updated_at'         => now(),
-        ]);
+
+        // \DB::table('password_reset')->insert([
+        //     'user_id'            => $user->id,
+        //     'email'              => $user->email,
+        //     'token'              => $token,
+        //     'temp_hash_password' => $hashedTempPassword,
+        //     'temp_password'      => $tempPassword,
+        //     'is_active'          => 'yes', 
+        //     'created_at'         => now(),
+        //     'updated_at'         => now(),
+        // ]);
 
         
         $link = url('/login?token=' . $token);
