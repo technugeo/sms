@@ -53,7 +53,7 @@ class CreateStaff extends CreateRecord
         $token = Str::uuid();
 
         // Insert password reset token record
-        \DB::table('password_reset_tokens')->insert([
+        \DB::table('password_reset')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
             'token'              => $token,

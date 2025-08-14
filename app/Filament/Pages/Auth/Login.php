@@ -73,7 +73,7 @@ class Login extends BaseLogin
         ]);
 
         if ($this->token) {
-            $hasActiveToken = DB::table('password_reset_tokens')
+            $hasActiveToken = DB::table('password_reset')
                 ->where('email', $user->email)
                 ->where('is_active', 'yes')
                 ->exists();

@@ -61,7 +61,7 @@ class EditStudent extends EditRecord
 
         // Insert password reset token record
         $token = Str::uuid();
-        \DB::table('password_reset_tokens')->insert([
+        \DB::table('password_reset')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
             'token'              => $token,

@@ -139,8 +139,8 @@ class ForcePasswordReset extends ResetPassword
             ]);
         }
 
-        // Manual token validation against your password_reset_tokens table
-        $hasActiveToken = DB::table('password_reset_tokens')
+        // Manual token validation against your password_reset table
+        $hasActiveToken = DB::table('password_reset')
             ->where('email', $user->email)
             ->where('token', $this->token)
             ->where('is_active', 'yes')
@@ -164,7 +164,7 @@ class ForcePasswordReset extends ResetPassword
         ]);
 
         // Mark token as inactive
-        DB::table('password_reset_tokens')
+        DB::table('password_reset')
             ->where('email', $user->email)
             ->where('token', $this->token)
             ->update(['is_active' => 'no']);
