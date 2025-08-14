@@ -27,7 +27,7 @@ return new class extends Migration
             $table->enum('access_level', array_column(\App\Enum\RoleEnum::cases(), 'value'));
             // $table->foreignId('address_id')->constrained('addresses')->restrictOnDelete();
             $table->foreignId('address_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('institute_id')->constrained('institute')->restrictOnDelete();
+            $table->foreignId('institute_id')->constrained('institutions')->restrictOnDelete();
             $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
             $table->timestamps();
         });
