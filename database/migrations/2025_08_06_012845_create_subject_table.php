@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('is_core')->nullable();
             $table->string('subject_status')->nullable();
             $table->enum('status', ['yes', 'no'])->default('yes');
+            
+
             $table->timestamps();
             $table->softDeletes();
         });

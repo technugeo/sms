@@ -16,9 +16,10 @@ return new class extends Migration
             $table->id();
             $table->string('user_id');
             $table->string('matric_id');
+            $table->string('email');
             $table->string('nric', 12)->unique();
             $table->string('passport_no')->nullable();
-            $table->integer('phone_number');
+            $table->string('phone_number');
             $table->string('full_name');
             $table->enum('nationality_type',array_column(\App\Enum\NationalityEnum::cases(), 'value'));
             $table->enum('citizen',array_column(\App\Enum\CitizenEnum::cases(), 'value'));
@@ -31,6 +32,11 @@ return new class extends Migration
             $table->string('intake_month');
             $table->integer('intake_year');
             $table->integer('current_course');
+            
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('deleted_by')->nullable();
+
             $table->timestamps();
         });
     }

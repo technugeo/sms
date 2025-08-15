@@ -30,7 +30,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
 
     protected function generateTempPassword(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&*_';
         $password = '';
         $maxIndex = strlen($chars) - 1;
 
@@ -50,7 +50,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
             'email'              => $user->email,
             'token'              => $token,
             'temp_hash_password' => Hash::make($tempPassword),
-            'temp_password'      => $tempPassword,
+            'password'      => $tempPassword,
             'is_active'          => 'yes',
             'created_at'         => now(),
             'updated_at'         => now(),
@@ -102,9 +102,6 @@ class StudentsImport implements ToCollection, WithHeadingRow
             $intake = substr($row['intake_year'], 2, 2) . $this->convertMonthNameToNumber($row['intake_month']);
             $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-            // Update user's email to matricId
-            $user->email = $matricId;
-            $user->save();
 
             // Create student
             $student = Student::create([

@@ -25,6 +25,7 @@ class Student extends Model
     protected $fillable = [
         'matric_id',
         'nric',
+        'email',
         'phone_number',
         'full_name',
         'nationality',
@@ -40,6 +41,9 @@ class Student extends Model
         'intake_year',
         'passport_no',
         'current_course',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $casts = [

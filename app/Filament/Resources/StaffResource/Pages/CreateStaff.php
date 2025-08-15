@@ -21,7 +21,7 @@ class CreateStaff extends CreateRecord
      */
     protected function generateTempPassword(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&*_';
         $password = '';
         $maxIndex = strlen($chars) - 1;
 
@@ -39,7 +39,7 @@ class CreateStaff extends CreateRecord
 
         $user = User::create([
             'name'         => $data['name'],
-            'email'        => $data['nric'], 
+            'email'        => $data['email'], 
             'role'         => $data['access_level'],
             'password'     => $hashedTempPassword,
             'user_type'    => 'Employee',

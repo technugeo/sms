@@ -29,7 +29,7 @@ class CreateStudent extends CreateRecord
 
     protected function generateTempPassword(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&*_';
         $password = '';
         $maxIndex = strlen($chars) - 1;
 
@@ -40,52 +40,22 @@ class CreateStudent extends CreateRecord
         return $password;
     }
 
-    protected function sendRegistrationEmail(User $user, string $tempPassword): void
-    {
-        // Insert password reset token record
-        $token = Str::uuid();
-        \DB::table('password_reset_tokens')->insert([
-            'user_id'            => $user->id,
-            'email'              => $user->email,
-            'token'              => $token,
-            'temp_hash_password' => Hash::make($tempPassword),
-            'temp_password'      => $tempPassword,
-            'is_active'          => 'yes',
-            'created_at'         => now(),
-            'updated_at'         => now(),
-        ]);
-
-        // $link = url('/login?token=' . $token);
-
-        // Mail::raw("
-        // Thank you for registering with us.
-
-        // Below are your login credentials:
-
-        // User ID: {$user->email}
-        // Temporary Password: {$tempPassword}
-        // Link: {$link}
-
-        // Thank you,
-        // SMS Support Team
-        // ", function ($message) use ($user) {
-        //     $message->to('aishah@nugeosolutions.com') 
-        //             ->subject('Your SMS Account Credentials');
-        // });
-    }
 
     protected function handleRecordCreation(array $data): Student
     {
-        // Generate temp password
         $tempPassword = $this->generateTempPassword();
+        $hashedTempPassword = Hash::make($tempPassword);
 
-        // Create user with temporary email (will be matricId later)
+        // Store original email for student table
+        $studentEmail = $data['email'];
+
+        // Create the user
         $user = User::create([
             'name'         => $data['full_name'],
-            'email'        => $data['email'], 
+            'email'        => $data['email'],
             'profile_type' => Student::class,
             'role'         => 'S',
-            'password'     => Hash::make($tempPassword),
+            'password'     => $hashedTempPassword,
         ]);
 
         // Generate matricId
@@ -95,22 +65,30 @@ class CreateStudent extends CreateRecord
         $intake = substr($data['intake_year'], 2, 2) . $this->convertMonthNameToNumber($data['intake_month']);
         $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-        // Update user's email to matricId
-        $user->email = $matricId;
-        $user->save();
-
         // Prepare student data
-        unset($data['email']);
-        $data['user_id'] = $user->id;
-        $data['matric_id'] = $matricId;
+        $data['user_id']    = $user->id;
+        $data['matric_id']  = $matricId;
+        $data['email']      = $studentEmail; // set the original form email for student
+        $data['created_by'] = auth()->user()->email ?? 'system';
+        $data['updated_by'] = auth()->user()->email ?? 'system';
 
         $student = Student::create($data);
 
-        // Send registration email only if academic_status is 'Registered'
-        if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
-            $this->sendRegistrationEmail($user, $tempPassword);
-        }
+        // Save temp password in a separate table
+        \DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => Str::uuid(),
+            'temp_hash_password' => $hashedTempPassword,
+            'password'           => $tempPassword,
+            'is_active'          => 'yes',
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
 
         return $student;
     }
+
+
+
 }

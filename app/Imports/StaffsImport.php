@@ -19,7 +19,7 @@ class StaffsImport implements ToCollection, WithHeadingRow
 {
     protected function generateTempPassword(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&*_';
         $password = '';
         $maxIndex = strlen($chars) - 1;
 
@@ -43,7 +43,7 @@ class StaffsImport implements ToCollection, WithHeadingRow
             
             $user = User::create([
                 'name'         => $row['full_name'],
-                'email'        => $row['nric'],
+                'email'        => $row['email'],
                 'role'         => $row['access_level'],
                 'password'     => $hashedTempPassword,
                 'user_type'    => 'Employee',
@@ -57,7 +57,7 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'email'              => $user->email,
                 'token'              => $token,
                 'temp_hash_password' => $hashedTempPassword,
-                'temp_password'      => $tempPassword,
+                'password'      => $tempPassword,
                 'is_active'          => 'yes',
                 'created_at'         => now(),
                 'updated_at'         => now(),

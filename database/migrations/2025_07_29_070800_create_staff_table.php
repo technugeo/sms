@@ -35,9 +35,15 @@ return new class extends Migration
             // $table->foreignId('address_id')->constrained('addresses')->restrictOnDelete();
             
             $table->string('institute_id');
-            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
+            $table->string('department_id');
+            
             $table->foreignId('address_id')->nullable()->constrained()->nullOnDelete();
             
+            
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('deleted_by')->nullable();
+
             $table->timestamps();
         });
     }

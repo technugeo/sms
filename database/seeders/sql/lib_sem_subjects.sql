@@ -1,0 +1,63 @@
+-- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
+--
+-- Host: localhost    Database: laravel
+-- ------------------------------------------------------
+-- Server version	8.4.2
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `lib_sem_subjects`
+--
+
+DROP TABLE IF EXISTS `lib_sem_subjects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lib_sem_subjects` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `subject_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `semester` int NOT NULL DEFAULT '0',
+  `credit_hour` int NOT NULL,
+  `is_core` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Active','Inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
+  `created_by` int DEFAULT NULL,
+  `updated_by` int DEFAULT NULL,
+  `deleted_by` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lib_sem_subjects`
+--
+
+LOCK TABLES `lib_sem_subjects` WRITE;
+/*!40000 ALTER TABLE `lib_sem_subjects` DISABLE KEYS */;
+INSERT INTO `lib_sem_subjects` VALUES (1,'ARB 2022','Arabic Language 1',4,2,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 23:55:42',NULL),(2,'ARB 2032','Arabic Language 2',5,2,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 23:56:21',NULL),(3,'DCA 2524','Asian & Eastern Cuisine',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(4,'DPB 2414','Asian \'Kuih Muih\'',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(5,'MPU 2213','Bahasa Kebangsaan A',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(6,'ACC 2013','Basic Accounting',2,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-14 00:01:01',NULL),(7,'ARB 2012','Basic Arabic Language',1,2,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(8,'DCA 2513','Basic Purchasing',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(9,'DCA 2123','Basic Western Cookery',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(10,'DPB 2224','Breads & Rolls',2,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-14 00:00:44',NULL),(11,'DPB 2424','Cake Decorations',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(12,'DTM 2233','Culture / Heritage Tourism',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(13,'DHM 2123','Customer Service',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(14,'ENL 2023','English Communication 1',0,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(15,'ENL 2033','English Communication 2',0,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(16,'DTM 2523','E-Tourism',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(17,'DTM 2543','Event Management',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(18,'DFSM 2423','Food & Beverage Cost Control',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(19,'DHM 2414','Food & Beverage Service',0,4,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(20,'ENL 2013','Foundation English',1,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(21,'DHM 2424','Front Office Operation',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(22,'DPB 2114 ','Fundamentals of Baking',1,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(23,'DCA 2113','Fundamentals of Food',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(24,'DTM 2123','Fundamentals of Tourism',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(25,'DCA 2224','Garde Manger',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(26,'DTM 2213','Geographical Tourism Industry',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(27,'DHM 2514','Housekeeping Operation',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(28,'LI 2718','Industrial Training',0,8,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(29,'DCA 2214 ','Intermediate Cookery',2,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-14 00:00:27',NULL),(30,'DCA 2424','International Cuisine',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(31,'BE 2013','Introduction to Business & Entrepreneurship',0,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(32,'DFSM 2212','Introduction to Fast Food Management',0,2,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(33,'DFSM 2113','Introduction to Food Hygiene & Sanitation',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(34,'DFSM 2123','Introduction to Foodservice Management',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(35,'DFSM 2132','Introduction to Halal Food Industry',1,2,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(36,'DHM 2113','Introduction To Hospitality Industry',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(37,'DHM 2213','Introduction to Hotel Operation Management',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(38,'HRM 2013','Introduction to Human Resource Management',0,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(39,'MPU 2223','Introduction To Information Technology',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(40,'DCA 2133','Introduction To Kitchen Management',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(41,'MGT 2013','Introduction to Management',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(42,'DFSM 2413','Introduction to Nutrition',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(43,'MPU 2462','Khidmat Masyarakat/Community Service',0,2,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(44,'MPU 2472','Kursus Integriti dan Antirasuah',0,2,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(45,'MPU 2233','Leadership Skills 2',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(46,'DFSM 2523','Legal Aspects in Hospitality Industry',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(47,'DCA 2414','Malay Cuisine',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(48,'DFSM 2313','Menu Planning and Development',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(49,'DTM 2513','MICE for Tourism',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(50,'DPB 2524','Pastry & Bakery Business Operation',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(51,'DPB 2514','Pastry & Dessert Artistry',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(52,'MPU 2343','Pengajian Islam/Islamic Studies',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(53,'MPU 2353','Pengajian Moral/Moral Studies',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(54,'MPU 2183','Penghayatan Etika dan Peradaban',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(55,'MPU 2253','Personal Grooming & Dress Etiquette',0,3,NULL,'MPU','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(56,'MKT 2013','Principles of Marketing',0,3,NULL,'COMMON','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(57,'DTM 2224','Recreational Tourism',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(58,'DFSM 2514','Restaurant Operation',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(59,'DTM 2414','Ticketing & Reservation',0,4,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(60,'DTM 2423','Tour Planning and Guiding',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(61,'DTM 2433','Tourism Sales & Promotion',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(62,'DTM 2113','Transportation Tourism',1,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL),(63,'DTM 2533','Travel & Tour Agency Management',0,3,NULL,'DISCIPLINE','Active',NULL,NULL,NULL,'2025-08-13 19:59:52','2025-08-13 19:59:52',NULL);
+/*!40000 ALTER TABLE `lib_sem_subjects` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-08-15 10:57:04

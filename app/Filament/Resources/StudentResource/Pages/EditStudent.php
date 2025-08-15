@@ -6,7 +6,6 @@ use App\Filament\Resources\StudentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\Student;
 use App\Enum\AcademicEnum;
@@ -52,6 +51,9 @@ class EditStudent extends EditRecord
 
         unset($data['email']); // prevent saving email to students table
 
+        
+        $data['updated_by'] = auth()->user()->email ?? 'system';
+
         return $data;
     }
 
@@ -66,30 +68,33 @@ class EditStudent extends EditRecord
             'email'              => $user->email,
             'token'              => $token,
             'temp_hash_password' => Hash::make($tempPassword),
-            'temp_password'      => $tempPassword,
+            'password'           => $tempPassword,
             'is_active'          => 'yes',
             'created_at'         => now(),
             'updated_at'         => now(),
         ]);
 
-        // $link = url('/login?token=' . $token);
+        // Uncomment if you want to send email
+        /*
+        $link = url('/login?token=' . $token);
 
-        // Mail::raw("
-        // Thank you for registering with us.
+        Mail::raw("
+        Thank you for registering with us.
 
-        // Below are your login credentials:
+        Below are your login credentials:
 
-        // Student name: {$user->name}
-        // User ID: {$user->email}
-        // Temporary Password: {$tempPassword}
-        // Link: {$link}
+        Student name: {$user->name}
+        User ID: {$user->email}
+        Temporary Password: {$tempPassword}
+        Link: {$link}
 
-        // Thank you,
-        // SMS Support Team
-        // ", function ($message) use ($user) {
-        //     $message->to('aishah@nugeosolutions.com') 
-        //             ->subject('Your SMS Account Credentials');
-        // });
+        Thank you,
+        SMS Support Team
+        ", function ($message) use ($user) {
+            $message->to('aishah@nugeosolutions.com')
+                    ->subject('Your SMS Account Credentials');
+        });
+        */
     }
 
     protected function afterSave(): void
@@ -100,7 +105,7 @@ class EditStudent extends EditRecord
             : $student->academic_status;
 
         // Send email only if original status was not 'Registered' and new status is 'Registered'
-        if (($this->originalStatus ?? null) !== AcademicEnum::REGISTERED->value 
+        if (($this->originalStatus ?? null) !== AcademicEnum::REGISTERED->value
             && $newStatus === AcademicEnum::REGISTERED->value) {
 
             $tempPassword = Str::random(12);

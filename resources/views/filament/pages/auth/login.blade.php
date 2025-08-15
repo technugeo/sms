@@ -1,3 +1,11 @@
+@if (session('password_updated'))
+    <div class="mb-4 p-3 text-sm text-green-700 bg-green-100 rounded-lg">
+        {{ session('password_updated') }}
+    </div>
+@endif
+
+
+
 <x-filament::page>
     <form wire:submit.prevent="authenticate" class="space-y-6 max-w-md mx-auto">
         <x-filament::input

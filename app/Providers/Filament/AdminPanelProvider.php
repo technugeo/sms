@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->pages([
                 Pages\Dashboard::class, // Dashboard appears as a top-level menu
+                \App\Filament\Pages\UpdatePassword::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -45,6 +46,14 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
+            ->userMenuItems([
+                'password' => \Filament\Navigation\UserMenuItem::make()
+                    ->label('Update Password')
+                    ->icon('heroicon-o-key')
+                    ->url(fn (): string => \App\Filament\Pages\UpdatePassword::getUrl(panel: 'admin')),
+            ])
+
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -62,5 +71,6 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 //
             ]);
+
     }
 }

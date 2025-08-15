@@ -53,7 +53,8 @@ class StaffResource extends Resource
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->rule('digits_between:10,11'),
                 Forms\Components\TextInput::make('nric')
                     ->required()
                     ->maxLength(12),
@@ -147,21 +148,24 @@ class StaffResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nric')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('phone_number')
-                    ->numeric()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 Tables\Columns\TextColumn::make('gender'),
-                Tables\Columns\TextColumn::make('institute.name')
-                    ->numeric()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('institute.name')
+                //     ->numeric()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('department.name')
                     ->numeric()
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('access_level'),
+                Tables\Columns\TextColumn::make('user.status')
+                    ->label('Account status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

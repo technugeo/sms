@@ -11,7 +11,7 @@ use Filament\Forms;
 
 class Login extends BaseLogin
 {
-    public ?string $user_id = null;
+    public ?string $email = null;
     public ?string $password = null;
     public ?string $token = null;
 
@@ -20,10 +20,16 @@ class Login extends BaseLogin
         return [
             'form' => $this->makeForm()
                 ->schema([
-                    Forms\Components\TextInput::make('user_id')
-                        ->label('User ID')->required()->autocomplete(false)->autofocus(),
+                    Forms\Components\TextInput::make('email')
+                        ->label('Email')
+                        ->email()
+                        ->required()
+                        ->autocomplete(false)
+                        ->autofocus(),
                     Forms\Components\TextInput::make('password')
-                        ->label(__('Password'))->password()->required(),
+                        ->label(__('Password'))
+                        ->password()
+                        ->required(),
                     Forms\Components\Hidden::make('token')
                         ->default(request()->query('token'))
                         ->dehydrated(false),
@@ -31,26 +37,36 @@ class Login extends BaseLogin
         ];
     }
 
-
-
     public function mount(): void
     {
         $this->token = request()->query('token');
+
+        parent::mount();
+
+        if (request()->hasCookie('post_password_update_notice')) {
+            \Filament\Notifications\Notification::make()
+                ->title('Password updated successfully')
+                ->body('Please login again with your new password.')
+                ->success()
+                ->send();
+        }
+
     }
+
 
     public function authenticate(): ?LoginResponse
     {
         $credentials = $this->validate([
-            'user_id' => ['required', 'string'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
 
         if (!Auth::attempt([
-            'email' => $this->user_id,
+            'email' => $this->email,
             'password' => $this->password,
         ])) {
             throw ValidationException::withMessages([
-                'user_id' => __('auth.failed'),
+                'email' => __('auth.failed'),
             ]);
         }
 
@@ -60,17 +76,39 @@ class Login extends BaseLogin
         if (!in_array($user->role, $allowedRoles)) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'user_id' => 'Unauthorized role',
+                'email' => 'Unauthorized role',
             ]);
         }
 
+        
+        if ($user->status === 'Suspended') {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been suspended. Please contact support.',
+            ]);
+        }
+
+        
+        if (is_null($user->email_verified_at) && $user->is_active == 0 && $user->status === 'Pending Activation') {
+            $user->email_verified_at = now();
+            $user->is_active = 1;
+            $user->status = 'Activated';
+            $user->save();
+
+            $user->refresh();
+        }
+
+
+
         \Log::info('Login attempt', [
-            'user_id' => $this->user_id,
+            'email' => $this->email,
             'has_token' => $this->token !== null,
             'token_value' => $this->token,
-            'user_email_verified' => $user->email_verified,
+            'user_email_verified_at' => $user->email_verified_at, 
             'user_is_active' => $user->is_active,
+            'user_status' => $user->status,
         ]);
+
 
         if ($this->token) {
             $hasActiveToken = DB::table('password_reset_tokens')
@@ -78,7 +116,7 @@ class Login extends BaseLogin
                 ->where('is_active', 'yes')
                 ->exists();
 
-            if (is_null($user->email_verified) && $user->is_active == 0 && $hasActiveToken) {
+            if (is_null($user->email_verified_at) && $user->is_active == 0 && $hasActiveToken) {
                 session([
                     'force_password_reset_tokens' => true,
                     'force_password_reset_tokens_email' => $user->email,
@@ -95,11 +133,10 @@ class Login extends BaseLogin
 
                 return null;
             }
+
         }
 
         return app(LoginResponse::class);
     }
-
-
 
 }

@@ -14,8 +14,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Staff extends Model implements HasMedia
 {
+    use SoftDeletes;
+
     use InteractsWithMedia;
 
     protected $fillable = [

@@ -20,6 +20,8 @@ use App\Enum\IntakeEnum;
 
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -70,7 +72,17 @@ class StudentResource extends Resource
 
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
-                    ->required(),
+                    ->required()
+                    ->afterStateHydrated(function ($component, $record, $state) {
+                        if ($record) {
+                            // Only set the state when editing an existing student
+                            $component->state($record->email);
+                        }
+                    })
+                    ->dehydrateStateUsing(fn ($state) => $state),
+
+
+
 
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
@@ -121,15 +133,19 @@ class StudentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('full_name'),
                 Tables\Columns\TextColumn::make('matric_id')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('full_name'),
                 Tables\Columns\TextColumn::make('nric')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('phone_number')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('passport_no')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nationality_type'),
+                // Tables\Columns\TextColumn::make('nationality_type'),
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 
@@ -156,6 +172,38 @@ class StudentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
+                Tables\Actions\Action::make('updateAcademicStatus')
+                    ->label('Update Status')
+                    ->icon('heroicon-m-adjustments-vertical')
+                    ->form([
+                        Forms\Components\Select::make('academic_status')
+                            ->label('Academic Status')
+                            ->options(AcademicEnum::class)
+                            ->required(),
+                    ])
+                    ->action(function (array $data, $record): void {
+                        $record->update([
+                            'academic_status' => $data['academic_status'],
+                        ]);
+
+                        if (strtolower($data['academic_status']) === 'suspended') {
+                            if ($record->user) {
+                                $record->user->update([
+                                    'status' => 'Suspended',
+                                ]);
+                            }
+                        }
+                        Notification::make()
+                            ->title('Academic status updated')
+                            ->success()
+                            ->body("{$record->full_name}'s academic status was changed successfully.")
+                            ->send();
+                    })
+                    ->modalHeading('Update Academic Status')
+                    ->modalButton('Update')
+                    ->requiresConfirmation(false),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
