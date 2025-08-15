@@ -23,6 +23,9 @@ return new class extends Migration
             $table->softDeletes()->after('staff_type');
 
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('created_by', 200)->nullable()->change();
+            $table->string('updated_by', 200)->nullable()->change();
+            $table->string('deleted_by', 200)->nullable()->change();
         });
     }
 
@@ -32,6 +35,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('staff', function (Blueprint $table) {
+            $table->integer('created_by')->change();
+            $table->integer('updated_by')->change();
+            $table->integer('deleted_by')->nullable()->change();
+            
             $table->dropColumn('employment_status');
             $table->dropColumn('staff_type');
         });
