@@ -19,6 +19,10 @@ return new class extends Migration
             $table->enum('staff_type', ['Full-time', 'Contract', 'Intern'])
                 ->default('full-time')
                 ->after('employment_status');
+
+            $table->softDeletes()->after('staff_type');
+
+            $table->unsignedBigInteger('user_id')->nullable();
         });
     }
 

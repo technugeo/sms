@@ -35,17 +35,27 @@ class EditStaff extends EditRecord
      */
     protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
     {
+        $user = $record->user;
+
         // Update the related user (name & email)
-        $record->user->update([
+        $user->update([
             'name'  => $data['name'],
             'email' => $data['email'],
         ]);
 
-        // Remove user-specific fields before updating the staff
-        unset($data['name'], $data['email']);
+        // Update role if provided
+        if (!empty($data['access_level'])) {
+            // Remove existing roles and assign new role
+            $user->syncRoles([$data['access_level']]);
+        }
 
+        // Remove user-specific fields before updating the staff
+        unset($data['name'], $data['email'], $data['access_level']);
+
+        // Update the staff record
         $record->update($data);
 
         return $record;
     }
+
 }

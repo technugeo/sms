@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\Course;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CreateStudent extends CreateRecord
@@ -40,7 +39,6 @@ class CreateStudent extends CreateRecord
         return $password;
     }
 
-
     protected function handleRecordCreation(array $data): Student
     {
         $tempPassword = $this->generateTempPassword();
@@ -54,9 +52,11 @@ class CreateStudent extends CreateRecord
             'name'         => $data['full_name'],
             'email'        => $data['email'],
             'profile_type' => Student::class,
-            'role'         => 'S',
+            'role'         => 'S', // Student role
             'password'     => $hashedTempPassword,
         ]);
+
+        $user->assignRole('S');
 
         // Generate matricId
         $course = Course::where('prog_code', $data['current_course'])->first();
@@ -68,7 +68,7 @@ class CreateStudent extends CreateRecord
         // Prepare student data
         $data['user_id']    = $user->id;
         $data['matric_id']  = $matricId;
-        $data['email']      = $studentEmail; // set the original form email for student
+        $data['email']      = $studentEmail;
         $data['created_by'] = auth()->user()->email ?? 'system';
         $data['updated_by'] = auth()->user()->email ?? 'system';
 
@@ -88,7 +88,4 @@ class CreateStudent extends CreateRecord
 
         return $student;
     }
-
-
-
 }

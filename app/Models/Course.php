@@ -23,6 +23,9 @@ class Course extends Model
         'sponsoring_body',
         'programme_type', 
         'status',        
+        'created_by',        
+        'updated_by',        
+        'deleted_by',        
     ];
 
     protected $casts = [

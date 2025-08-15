@@ -13,7 +13,6 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class StaffsImport implements ToCollection, WithHeadingRow
 {
@@ -40,53 +39,35 @@ class StaffsImport implements ToCollection, WithHeadingRow
             $tempPassword = $this->generateTempPassword();
             $hashedTempPassword = Hash::make($tempPassword);
 
-            
+            // Step 1: Create User
             $user = User::create([
                 'name'         => $row['full_name'],
                 'email'        => $row['email'],
-                'role'         => $row['access_level'],
                 'password'     => $hashedTempPassword,
-                'user_type'    => 'Employee',
                 'profile_type' => 'App\\Models\\Staff',
+                'status'       => 'Pending Activation',
             ]);
 
-            $token = Str::uuid();
+            // Step 2: Assign role using Spatie's assignRole method
+            if (!empty($row['access_level'])) {
+                $user->assignRole($row['access_level']);
+            }
 
+            // Step 3: Insert password reset token
+            $token = Str::uuid();
             DB::table('password_reset_tokens')->insert([
                 'user_id'            => $user->id,
                 'email'              => $user->email,
                 'token'              => $token,
                 'temp_hash_password' => $hashedTempPassword,
-                'password'      => $tempPassword,
+                'password'           => $tempPassword,
                 'is_active'          => 'yes',
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ]);
 
-            $link = url('/login?token=' . $token);
-
-            // For testing, send all emails to your own address
-            // $testingEmail = 'your_email@example.com'; // replace with your email
-
-            // Mail::raw("
-            // Thank you for registering with us.
-
-            // Below are your login credentials:
-
-            // User ID: {$user->email}
-            // Temporary Password: {$tempPassword}
-            // Access Role: {$user->role}
-            // Link: {$link}
-
-            // Thank you,
-            // SMS Support Team
-            // ", function ($message) use ($testingEmail) {
-            //     $message->to('aishah@nugeosolutions.com') 
-            //             ->subject('Your SMS Account Credentials (TEST)');
-            // });
-
-            
-            Staff::create([
+            // Step 4: Create Staff record
+            $staff = Staff::create([
                 'user_id'          => $user->id,
                 'institute_id'     => $row['mqa_institute_id'] ?? null,
                 'department_id'    => $row['department_id'] ?? null,
@@ -105,6 +86,10 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'access_level'     => $row['access_level'] ?? null,
                 'position'         => $row['position'] ?? null,
             ]);
+
+            // Step 5: Update User's profile_id to link back to Staff
+            $user->profile_id = $staff->id;
+            $user->save();
         }
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -13,8 +12,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
-
-use App\Filament\Pages\Auth\CustomResetPassword;
 
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -36,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->pages([
-                Pages\Dashboard::class, // Dashboard appears as a top-level menu
+                Pages\Dashboard::class,
                 \App\Filament\Pages\UpdatePassword::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -52,8 +49,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-key')
                     ->url(fn (): string => \App\Filament\Pages\UpdatePassword::getUrl(panel: 'admin')),
             ])
-
-
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -71,6 +66,6 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 //
             ]);
-
     }
+
 }

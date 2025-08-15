@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
+use App\Filament\Resources\StudentResource\Pages\CreateStudent;
 use App\Enum\AcademicEnum;
 
 class StudentsImport implements ToCollection, WithHeadingRow
@@ -41,39 +40,54 @@ class StudentsImport implements ToCollection, WithHeadingRow
         return $password;
     }
 
-    protected function sendRegistrationEmail(User $user, string $tempPassword): void
+    protected function handleStudentCreation(array $row): Student
     {
-        $token = Str::uuid();
+        // Prepare temp password
+        $tempPassword = $this->generateTempPassword();
 
-        DB::table('password_reset_tokens')->insert([
-            'user_id'            => $user->id,
-            'email'              => $user->email,
-            'token'              => $token,
-            'temp_hash_password' => Hash::make($tempPassword),
-            'password'      => $tempPassword,
-            'is_active'          => 'yes',
-            'created_at'         => now(),
-            'updated_at'         => now(),
+        // Create user
+        $user = User::create([
+            'name'         => $row['full_name'],
+            'email'        => $row['email'],
+            'profile_type' => Student::class,
+            'role'         => 'S', // Student role
+            'password'     => Hash::make($tempPassword),
         ]);
 
-        // $link = url('/login?token=' . $token);
+        $user->assignRole('S');
 
-        // Mail::raw("
-        // Thank you for registering with us.
+        // Generate matricId
+        $course = Course::where('prog_code', $row['course_code'])->first();
+        $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '00';
+        $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
+        $intake = substr($row['intake_year'], 2, 2) . $this->convertMonthNameToNumber($row['intake_month']);
+        $matricId = 'FIM12' . $progCode . $runningNo . $intake;
 
-        // Below are your login credentials:
+        // Create student
+        $student = Student::create([
+            'user_id'          => $user->id,
+            'matric_id'        => $matricId,
+            'current_course'   => $row['course_code'],
+            'intake_month'     => $row['intake_month'],
+            'intake_year'      => $row['intake_year'],
+            'full_name'        => $row['full_name'],
+            'nric'             => $row['nric'],
+            'email'            => $row['email'],
+            'phone_number'     => $row['phone_number'],
+            'nationality'      => $row['nationality'],
+            'passport_no'      => $row['passport_no'] ?? null,
+            'gender'           => $row['gender'],
+            'marriage_status'  => $row['marriage_status'],
+            'race'             => $row['race'],
+            'religion'         => $row['religion'],
+            'citizen'          => $row['citizen'],
+            'nationality_type' => $row['nationality_type'],
+            'academic_status'  => $row['academic_status'] ?? null,
+            'created_by'       => auth()->user()->email ?? 'system',
+            'updated_by'       => auth()->user()->email ?? 'system',
+        ]);
 
-        // Student name: {$user->name}
-        // User ID: {$user->email}
-        // Temporary Password: {$tempPassword}
-        // Link: {$link}
-
-        // Thank you,
-        // SMS Support Team
-        // ", function ($message) use ($user) {
-        //     $message->to('aishah@nugeosolutions.com') 
-        //             ->subject('Your SMS Account Credentials');
-        // });
+        return $student;
     }
 
     public function collection(Collection $rows)
@@ -83,52 +97,9 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Generate temp password
-            $tempPassword = $this->generateTempPassword();
-
-            // Create user first
-            $user = User::create([
-                'name'         => $row['full_name'],
-                'email'        => $row['email'], // temporary, will be matricId later
-                'profile_type' => Student::class,
-                'role'         => 'S',
-                'password'     => Hash::make($tempPassword),
-            ]);
-
-            // Prepare matric_id
-            $course = Course::where('prog_code', $row['course_code'])->first();
-            $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '00';
-            $runningNo = str_pad($user->id, 4, '0', STR_PAD_LEFT);
-            $intake = substr($row['intake_year'], 2, 2) . $this->convertMonthNameToNumber($row['intake_month']);
-            $matricId = 'FIM12' . $progCode . $runningNo . $intake;
-
-
-            // Create student
-            $student = Student::create([
-                'user_id'          => $user->id,
-                'matric_id'        => $matricId,
-                'current_course'   => $row['course_code'],
-                'intake_month'     => $row['intake_month'],
-                'intake_year'      => $row['intake_year'],
-                'full_name'        => $row['full_name'],
-                'nric'             => $row['nric'],
-                'email'            => $row['email'], // optional: original email
-                'phone_number'     => $row['phone_number'],
-                'nationality'      => $row['nationality'],
-                'passport_no'      => $row['passport_no'] ?? null,
-                'gender'           => $row['gender'],
-                'marriage_status'  => $row['marriage_status'],
-                'race'             => $row['race'],
-                'religion'         => $row['religion'],
-                'citizen'          => $row['citizen'],
-                'nationality_type' => $row['nationality_type'],
-                'academic_status'  => $row['academic_status'],
-            ]);
-
-            // Send email if academic_status is 'Registered'
-            if (isset($row['academic_status']) && $row['academic_status'] === AcademicEnum::REGISTERED->value) {
-                $this->sendRegistrationEmail($user, $tempPassword);
-            }
+            // Convert row collection to array
+            $this->handleStudentCreation($row->toArray());
         }
     }
+
 }

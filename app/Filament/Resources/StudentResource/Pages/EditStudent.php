@@ -14,7 +14,6 @@ class EditStudent extends EditRecord
 {
     protected static string $resource = StudentResource::class;
 
-    // Store the original academic status before saving
     protected ?string $originalStatus = null;
 
     protected function getHeaderActions(): array
@@ -37,21 +36,15 @@ class EditStudent extends EditRecord
     {
         $student = $this->record;
 
-        // Save the original academic status as a string
         $this->originalStatus = $student->academic_status instanceof AcademicEnum
             ? $student->academic_status->value
             : $student->academic_status;
 
-        // Update user email if provided
         if (isset($data['email']) && $student->user) {
-            $student->user->update([
-                'email' => $data['email'],
-            ]);
+            $student->user->update(['email' => $data['email']]);
         }
 
-        unset($data['email']); // prevent saving email to students table
-
-        
+        unset($data['email']); // prevent saving email to student table
         $data['updated_by'] = auth()->user()->email ?? 'system';
 
         return $data;
@@ -61,40 +54,16 @@ class EditStudent extends EditRecord
     {
         $user = $student->user;
 
-        // Insert password reset token record
-        $token = Str::uuid();
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
-            'token'              => $token,
+            'token'              => Str::uuid(),
             'temp_hash_password' => Hash::make($tempPassword),
             'password'           => $tempPassword,
             'is_active'          => 'yes',
             'created_at'         => now(),
             'updated_at'         => now(),
         ]);
-
-        // Uncomment if you want to send email
-        /*
-        $link = url('/login?token=' . $token);
-
-        Mail::raw("
-        Thank you for registering with us.
-
-        Below are your login credentials:
-
-        Student name: {$user->name}
-        User ID: {$user->email}
-        Temporary Password: {$tempPassword}
-        Link: {$link}
-
-        Thank you,
-        SMS Support Team
-        ", function ($message) use ($user) {
-            $message->to('aishah@nugeosolutions.com')
-                    ->subject('Your SMS Account Credentials');
-        });
-        */
     }
 
     protected function afterSave(): void
@@ -104,7 +73,6 @@ class EditStudent extends EditRecord
             ? $student->academic_status->value
             : $student->academic_status;
 
-        // Send email only if original status was not 'Registered' and new status is 'Registered'
         if (($this->originalStatus ?? null) !== AcademicEnum::REGISTERED->value
             && $newStatus === AcademicEnum::REGISTERED->value) {
 

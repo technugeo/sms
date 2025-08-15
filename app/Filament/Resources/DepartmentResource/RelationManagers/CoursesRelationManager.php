@@ -83,13 +83,24 @@ class CoursesRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['faculty_id'] = $this->ownerRecord->faculty_id ?? null;
-                        $data['created_by'] = auth()->id();
+                        $data['created_by'] = auth()->user()->email; // or id
+                        $data['updated_by'] = auth()->user()->email;
+
                         return $data;
                     })
                     ->using(function (array $data) {
                         return $this->getRelationship()->create($data);
                     }),
             ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['updated_by'] = auth()->user()->email; // or id
+                        return $data;
+                    }),
+                Tables\Actions\DeleteAction::make(),
+            ])
+
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->url(fn ($record) => route('filament.admin.resources.courses.view', $record))

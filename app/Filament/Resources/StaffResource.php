@@ -31,8 +31,17 @@ class StaffResource extends Resource
     
     public static function canAccess(): bool
     {
-        return auth()->check() && in_array(auth()->user()->role, ['SA', 'AA']);
+        return auth()->check() && auth()->user()->hasAnyRole(['SA', 'AA']);
     }
+
+    
+    public static function navigation(): ?NavigationItem
+    {
+        return parent::navigation()?->visible(fn (): bool => auth()->user()->hasAnyRole(['SA','AA']));
+    }
+
+
+
 
 
     protected static ?string $model = Staff::class;
@@ -119,15 +128,16 @@ class StaffResource extends Resource
                     }),
 
                 Forms\Components\Select::make('access_level')
+                    ->label('Role')
                     ->required()
                     ->options(function () {
-                        return collect([
-                            RoleEnum::NAO,
-                            RoleEnum::AO,
-                        ])->mapWithKeys(fn ($role) => [
-                            $role->value => $role->getLabel(),
-                        ])->toArray();
-                    }),
+                        return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
+                    })
+                    ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
+
+
+
+
                 Forms\Components\TextInput::make('position'),
 
 
@@ -163,7 +173,14 @@ class StaffResource extends Resource
                     ->numeric()
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('access_level'),
+                Tables\Columns\TextColumn::make('user.roles')
+                    ->label('Roles')
+                    ->formatStateUsing(function ($state, $record) {
+                        return $record->user->roles->pluck('name')->join(', ');
+                    }),
+
+
+
                 Tables\Columns\TextColumn::make('user.status')
                     ->label('Account status'),
                 Tables\Columns\TextColumn::make('created_at')

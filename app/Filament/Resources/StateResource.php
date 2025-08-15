@@ -16,9 +16,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class StateResource extends Resource
 {
     
-    public static function shouldRegisterNavigation(): bool
+    public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === 'SA';
+        return auth()->check() && auth()->user()->hasAnyRole(['SA']);
+    }
+
+    
+    public static function navigation(): ?NavigationItem
+    {
+        return parent::navigation()?->visible(fn (): bool => auth()->user()->hasAnyRole(['SA']));
     }
     
     protected static ?string $model = State::class;

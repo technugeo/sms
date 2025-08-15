@@ -23,9 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InstituteResource extends Resource
 {
-    public static function shouldRegisterNavigation(): bool
+    public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === 'SA';
+        return auth()->check() && auth()->user()->hasRole('SA');
     }
 
     protected static ?string $model = Institute::class;

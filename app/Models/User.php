@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
 use Spatie\Permission\Traits\HasRoles; 
 
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'role',
         'password',
         'profile_type',
+        'profile_id',
         'email_verified_at',   
         'is_active',          
         'status',              
@@ -57,5 +59,9 @@ class User extends Authenticatable
     public function addresses()
     {
         return $this->hasMany(Address::class);
+    }
+    public function student()
+    {
+        return $this->hasOne(Student::class, 'user_id');
     }
 }

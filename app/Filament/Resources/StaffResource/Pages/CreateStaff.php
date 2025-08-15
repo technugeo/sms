@@ -34,64 +34,53 @@ class CreateStaff extends CreateRecord
 
     protected function handleRecordCreation(array $data): Staff
     {
+        // Step 1: Generate temporary password
         $tempPassword = $this->generateTempPassword();
         $hashedTempPassword = Hash::make($tempPassword);
 
+        // Step 2: Create User first (needed for Staff.user_id)
         $user = User::create([
             'name'         => $data['name'],
-            'email'        => $data['email'], 
-            'role'         => $data['access_level'],
+            'email'        => $data['email'],
             'password'     => $hashedTempPassword,
-            'user_type'    => 'Employee',
-            'profile_type' => 'App\\Models\\Staff', 
+            'profile_type' => 'App\\Models\\Staff',
+            'status'       => 'Pending Activation',
         ]);
 
-        // Generate reset token
-        $token = Str::uuid();
+        // Assign role if provided
+        if (!empty($data['access_level'])) {
+            $user->assignRole($data['access_level']);
+        }
 
-        // Insert password reset token record
+        // Step 3: Prepare Staff data
+        $data['user_id']    = $user->id;
+        $data['full_name']  = $data['name'];
+        $data['email']      = $user->email;
+        $data['nationality']= $data['nationality'] ?? 'Malaysia';
+        unset($data['name']);
 
+        // Step 4: Create Staff
+        $staff = Staff::create($data);
+
+        // Step 5: Update User with profile_id
+        $user->profile_id = $staff->id;
+        $user->save();
+
+        // Step 6: Insert password reset token
+        $token = \Illuminate\Support\Str::uuid();
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
             'token'              => $token,
             'temp_hash_password' => $hashedTempPassword,
-            'password'      => $tempPassword,
-            'is_active'          => 'yes', 
+            'password'           => $tempPassword,
+            'is_active'          => 'yes',
             'created_at'         => now(),
             'updated_at'         => now(),
         ]);
 
-        
-        $link = url('/login?token=' . $token);
-
-        
-        // Mail::raw("
-        // Thank you for registering with us.
-
-        // Below are your login credentials:
-
-        // User ID: {$user->email}
-        // Temporary Password: {$tempPassword}
-        // Access Role: {$user->role}
-        // Link: {$link}
-
-        // Thank you,
-        // SMS Support Team
-        // ", function ($message) use ($data) {
-        //     $message->to('aishah@nugeosolutions.com') 
-        //             ->subject('Your SMS Account Credentials');
-        // });
-
-
-        $data['user_id']   = $user->id;
-        $data['full_name'] = $data['name'];
-        $data['email']     = $user->email;
-        $data['nationality'] = $data['nationality'] ?? 'Malaysia'; 
-
-        unset($data['name']); 
-
-        return Staff::create($data);
+        // Step 7: Return the Staff object
+        return $staff;
     }
 
 

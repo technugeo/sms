@@ -31,9 +31,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class StudentResource extends Resource
 {
     
-    public static function canSee(): bool
+     public static function canAccess(): bool
     {
-        return in_array(auth()->user()->role, ['SA', 'AA', 'NAO', 'AO']);
+        return auth()->check() && auth()->user()->hasAnyRole(['SA', 'AA','AO', 'NAO']);
+    }
+
+    
+    public static function navigation(): ?NavigationItem
+    {
+        return parent::navigation()?->visible(fn (): bool => auth()->user()->hasAnyRole(['SA', 'AA','AO', 'NAO']));
     }
 
     protected static ?string $model = Student::class;

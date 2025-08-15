@@ -13,8 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(WorldSeeder::class);
-        $this->call(InstituteSeeder::class);
-        $this->call(SuperAdminSeeder::class);
+        $this->call(WorldSeeder::class); // countries, regions, etc.
+        
+        $this->call(RolesSeeder::class); // create roles
+        $this->call(PermissionsSeeder::class); // create permissions and assign to roles
+
+        $this->call(InstituteSeeder::class); // institutes
+        $this->call(SuperAdminSeeder::class); // create superadmin user and assign SA role
     }
+
 }
