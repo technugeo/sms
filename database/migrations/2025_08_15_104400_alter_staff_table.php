@@ -22,7 +22,7 @@ return new class extends Migration
 
             $table->softDeletes()->after('staff_type');
 
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable()->change();
             $table->string('created_by', 200)->nullable()->change();
             $table->string('updated_by', 200)->nullable()->change();
             $table->string('deleted_by', 200)->nullable()->change();
