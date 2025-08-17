@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->brandName('Student Management System') 
             ->pages([
                 Pages\Dashboard::class,
                 \App\Filament\Pages\UpdatePassword::class,

@@ -30,6 +30,7 @@ class SuperAdminSeeder extends Seeder
                 'email_verified_at' => now(),
                 'profile_id' => 1,
                 'profile_type' => 'App\Models\Employee',
+                'user_type' => 'Employee',
             ]
         );
 

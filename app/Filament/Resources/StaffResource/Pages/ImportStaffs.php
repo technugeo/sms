@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StaffsImport;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImportStaffs extends Page implements HasForms
 {
@@ -21,7 +22,6 @@ class ImportStaffs extends Page implements HasForms
     protected static string $view = 'filament.resources.staff-resource.pages.import-staffs';
     protected static ?string $title = 'Import Staffs';
 
-    // Store all form state here (safe for Livewire)
     public array $formData = [];
 
     public function mount(): void
@@ -33,10 +33,11 @@ class ImportStaffs extends Page implements HasForms
     {
         return $form
             ->schema([
-                FileUpload::make('excel_file')
-                    ->label('Excel File')
+                FileUpload::make('upload_file')
+                    ->label('Excel or CSV File')
                     ->required()
                     ->acceptedFileTypes([
+                        'text/csv',
                         'application/vnd.ms-excel',
                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     ])
@@ -45,21 +46,19 @@ class ImportStaffs extends Page implements HasForms
                     ->maxFiles(1)
                     ->saveUploadedFileUsing(function ($file) {
                         $timestamp = now()->format('Ymd_His');
-                        $extension = $file->getClientOriginalExtension() ?: 'xlsx';
+                        $extension = $file->getClientOriginalExtension() ?: 'csv';
                         $filename = "staff_{$timestamp}.{$extension}";
                         return $file->storeAs('staff_uploads', $filename);
                     }),
             ])
-            ->statePath('formData'); // bind entire form to $formData
+            ->statePath('formData');
     }
 
     public function submit(): void
     {
         $state = $this->form->getState();
 
-        $fileValue = $state['excel_file'] ?? null;
-
-        // Normalize the file value to a string path
+        $fileValue = $state['upload_file'] ?? null;
         $file = is_array($fileValue) ? ($fileValue[0] ?? null) : $fileValue;
 
         if (! $file) {
@@ -80,8 +79,17 @@ class ImportStaffs extends Page implements HasForms
 
         $path = Storage::path($file);
 
+        // Always convert uploaded file to CSV before importing
+        $csvFilename = 'staff_uploads/staff_' . Str::uuid() . '.csv';
+        $csvPath = Storage::path($csvFilename);
+
         try {
-            Excel::import(new StaffsImport(), $path);
+            // Convert Excel or CSV → CSV file
+            Excel::store(new \App\Imports\StaffsImport, $csvFilename, null, \Maatwebsite\Excel\Excel::CSV);
+
+            // Now import from the normalized CSV file
+            Excel::import(new StaffsImport(), $csvPath, null, \Maatwebsite\Excel\Excel::CSV);
+
         } catch (\Throwable $e) {
             Notification::make()
                 ->title('Import failed')
@@ -91,8 +99,9 @@ class ImportStaffs extends Page implements HasForms
             return;
         }
 
-        // Optionally delete file after import
+        // Clean up files
         Storage::delete($file);
+        Storage::delete($csvFilename);
 
         Notification::make()
             ->title('Staffs imported successfully!')

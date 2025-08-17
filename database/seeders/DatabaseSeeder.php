@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call(WorldSeeder::class); // countries, regions, etc.
         
         $this->call(RolesSeeder::class); // create roles
-        $this->call(PermissionsSeeder::class); // create permissions and assign to roles
+        $this->call(RolesAndPermissionsSeeder::class); // create permissions and assign to roles
 
         $this->call(InstituteSeeder::class); // institutes
         $this->call(SuperAdminSeeder::class); // create superadmin user and assign SA role

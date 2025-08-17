@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('staff', function (Blueprint $table) {
-            $table->enum('employment_status', ['Active', 'Inactive', 'Terminated'])
+            $table->enum('employment_status', ['Active', 'Inactive', 'Terminated','Deactivate'])
                 ->default('Active')
                 ->after('access_level');
 
@@ -23,6 +23,8 @@ return new class extends Migration
             $table->softDeletes()->after('staff_type');
 
             $table->unsignedBigInteger('user_id')->nullable()->change();
+            $table->integer('department_id')->nullable()->change();
+
             $table->string('created_by', 200)->nullable()->change();
             $table->string('updated_by', 200)->nullable()->change();
             $table->string('deleted_by', 200)->nullable()->change();
@@ -35,6 +37,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('staff', function (Blueprint $table) {
+            $table->integer('department_id')->nullable()->change();
             $table->integer('created_by')->change();
             $table->integer('updated_by')->change();
             $table->integer('deleted_by')->nullable()->change();

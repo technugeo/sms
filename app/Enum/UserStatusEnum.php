@@ -14,6 +14,7 @@ enum UserStatusEnum: string implements HasLabel, HasColor
     case PENDING_ACTIVATION = 'Pending Activation';
     case ACTIVATED = 'Activated';
     case SUSPENDED = 'Suspended';
+    case DELETED = 'Deleted';
 
     public function getColor(): string|array|null
     {
@@ -22,6 +23,7 @@ enum UserStatusEnum: string implements HasLabel, HasColor
             self::REGISTERED => Color::Blue,
             self::ACTIVATED => Color::Green,
             self::SUSPENDED => Color::Red,
+            self::DELETED => Color::Red,
         };
     }
 
@@ -33,6 +35,7 @@ enum UserStatusEnum: string implements HasLabel, HasColor
             self::PENDING_ACTIVATION => 'Pending Activation',
             self::ACTIVATED => 'Activated',
             self::SUSPENDED => 'Suspended',
+            self::DELETED => 'Deleted',
         };
     }
 }

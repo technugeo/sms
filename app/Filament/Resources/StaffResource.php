@@ -16,7 +16,8 @@ use App\Enum\GenderEnum;
 use App\Enum\NationalityEnum;
 use App\Enum\RaceEnum;
 use App\Enum\ReligionEnum;
-use App\Enum\RoleEnum;
+use App\Enum\StaffTypeEnum;
+use App\Enum\StatusEnum;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -127,6 +128,10 @@ class StaffResource extends Resource
                             ->toArray();
                     }),
 
+                Forms\Components\Select::make('staff_type')
+                    ->required()
+                    ->options(StaffTypeEnum::class),
+
                 Forms\Components\Select::make('access_level')
                     ->label('Role')
                     ->required()
@@ -139,6 +144,10 @@ class StaffResource extends Resource
 
 
                 Forms\Components\TextInput::make('position'),
+
+                Forms\Components\Select::make('employment_status')
+                    ->required()
+                    ->options(StatusEnum::class),
 
 
 

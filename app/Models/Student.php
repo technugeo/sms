@@ -56,6 +56,28 @@ class Student extends Model
         'religion' => ReligionEnum::class,
         'intake_month' => IntakeEnum::class,
     ];
+    
+    protected static function booted()
+    {
+        static::deleting(function ($student) {
+            
+            if (! $student->isForceDeleting()) {
+                // Track who deleted
+                if (auth()->check()) {
+                    $student->deleted_by = auth()->user()->email;
+                    $student->saveQuietly();
+                }
+
+                
+                if ($student->user) {
+                    $student->user->updateQuietly([
+                        'status' => 'DELETED',
+                    ]);
+                }
+            }
+        });
+    }
+
 
     /**
      * Get Nationality

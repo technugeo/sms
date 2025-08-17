@@ -81,12 +81,15 @@ class Login extends BaseLogin
         }
 
         
-        if ($user->status === 'Suspended') {
+        if (in_array($user->status, ['Suspended', 'Deleted'])) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => 'Your account has been suspended. Please contact support.',
+                'email' => $user->status === 'Suspended'
+                    ? 'Your account has been suspended. Please contact support.'
+                    : 'Your account has been deleted. Please contact support.',
             ]);
         }
+
 
         
         if (is_null($user->email_verified_at) && $user->is_active == 0 && $user->status === 'Pending Activation') {

@@ -6,7 +6,8 @@ use App\Enum\CitizenEnum;
 use App\Enum\GenderEnum;
 use App\Enum\MarriageEnum;
 use App\Enum\NationalityEnum;
-use App\Enum\RoleEnum;
+use App\Enum\StaffTypeEnum;
+use App\Enum\StatusEnum;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,9 @@ class Staff extends Model implements HasMedia
         'religion',
         'institute_id',
         'access_level',
+        'emplloyment_status',
+        'staff_type',
+        'deleted_by',
     ];
 
     protected $casts = [
@@ -47,7 +51,32 @@ class Staff extends Model implements HasMedia
         'citizen' => CitizenEnum::class,
         'marriage_status' => MarriageEnum::class,
         'gender' => GenderEnum::class,
+        'employment_stats' => StatusEnum::class,
+        'staff_type' => StaffTypeEnum::class,
     ];
+
+    protected static function booted()
+    {
+        static::deleting(function ($staff) {
+            // Only run on soft delete, not force delete
+            if (! $staff->isForceDeleting()) {
+                // Track who deleted
+                if (auth()->check()) {
+                    $staff->deleted_by = auth()->user()->email;
+                    $staff->saveQuietly(); // prevents triggering events again
+                }
+
+                // Update related user status
+                if ($staff->user) {
+                    $staff->user->updateQuietly([
+                        'status' => 'DELETED',
+                    ]);
+                }
+            }
+        });
+    }
+
+    
 
     public function user(): BelongsTo
     {
