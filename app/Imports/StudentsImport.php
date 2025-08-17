@@ -8,10 +8,12 @@ use App\Models\Course;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\Filament\Resources\StudentResource\Pages\CreateStudent;
 use App\Enum\AcademicEnum;
+
 
 class StudentsImport implements ToCollection, WithHeadingRow
 {
@@ -44,6 +46,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
     {
         // Prepare temp password
         $tempPassword = $this->generateTempPassword();
+        $hashedTempPassword = Hash::make($tempPassword);
 
         // Create user
         $user = User::create([
@@ -55,6 +58,18 @@ class StudentsImport implements ToCollection, WithHeadingRow
         ]);
 
         $user->assignRole('S');
+
+        $token = Str::uuid();
+        DB::table('password_reset_tokens')->insert([
+            'user_id'            => $user->id,
+            'email'              => $user->email,
+            'token'              => $token,
+            'temp_hash_password' => $hashedTempPassword,
+            'password'           => $tempPassword,
+            'is_active'          => 'yes',
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
 
         // Generate matricId
         $course = Course::where('prog_code', $row['course_code'])->first();
