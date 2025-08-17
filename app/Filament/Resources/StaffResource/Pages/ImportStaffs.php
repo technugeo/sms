@@ -79,17 +79,9 @@ class ImportStaffs extends Page implements HasForms
 
         $path = Storage::path($file);
 
-        // Always convert uploaded file to CSV before importing
-        $csvFilename = 'staff_uploads/staff_' . Str::uuid() . '.csv';
-        $csvPath = Storage::path($csvFilename);
-
         try {
-            // Convert Excel or CSV → CSV file
-            Excel::store(new \App\Imports\StaffsImport, $csvFilename, null, \Maatwebsite\Excel\Excel::CSV);
-
-            // Now import from the normalized CSV file
-            Excel::import(new StaffsImport(), $csvPath, null, \Maatwebsite\Excel\Excel::CSV);
-
+            // Maatwebsite Excel auto-detects format (Excel or CSV)
+            Excel::import(new StaffsImport(), $path);
         } catch (\Throwable $e) {
             Notification::make()
                 ->title('Import failed')
@@ -99,9 +91,8 @@ class ImportStaffs extends Page implements HasForms
             return;
         }
 
-        // Clean up files
+        // Delete uploaded file after import
         Storage::delete($file);
-        Storage::delete($csvFilename);
 
         Notification::make()
             ->title('Staffs imported successfully!')
@@ -110,4 +101,5 @@ class ImportStaffs extends Page implements HasForms
 
         $this->redirect(StaffResource::getUrl('index'));
     }
+
 }

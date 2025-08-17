@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role');
+            $table->string('role')->default('S');
             $table->enum('user_type',array_column(\App\Enum\UserTypeEnum::cases(), 'value'))->default(\App\Enum\UserTypeEnum::STUDENT->value);
             $table->enum('status',array_column(\App\Enum\UserStatusEnum::cases(), 'value'))->default(\App\Enum\UserStatusEnum::PENDING_ACTIVATION->value);
             $table->boolean('is_active')->default(false);

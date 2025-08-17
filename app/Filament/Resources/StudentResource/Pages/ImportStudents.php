@@ -33,10 +33,11 @@ class ImportStudents extends Page implements HasForms
     {
         return $form
             ->schema([
-                FileUpload::make('excel_file')
-                    ->label('Excel File')
+                FileUpload::make('upload_file')
+                    ->label('Excel or CSV File')
                     ->required()
                     ->acceptedFileTypes([
+                        'text/csv',
                         'application/vnd.ms-excel',
                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     ])
@@ -45,7 +46,7 @@ class ImportStudents extends Page implements HasForms
                     ->maxFiles(1)
                     ->saveUploadedFileUsing(function ($file) {
                         $timestamp = now()->format('Ymd_His');
-                        $extension = $file->getClientOriginalExtension() ?: 'xlsx';
+                        $extension = $file->getClientOriginalExtension() ?: 'csv';
                         $filename = "student_{$timestamp}.{$extension}";
                         return $file->storeAs('student_uploads', $filename);
                     }),
@@ -57,9 +58,7 @@ class ImportStudents extends Page implements HasForms
     {
         $state = $this->form->getState();
 
-        $fileValue = $state['excel_file'] ?? null;
-
-        // Normalize the file value to a string path
+        $fileValue = $state['upload_file'] ?? null;
         $file = is_array($fileValue) ? ($fileValue[0] ?? null) : $fileValue;
 
         if (! $file) {
@@ -81,6 +80,7 @@ class ImportStudents extends Page implements HasForms
         $path = Storage::path($file);
 
         try {
+            // Maatwebsite Excel auto-detects format (Excel or CSV)
             Excel::import(new StudentsImport(), $path);
         } catch (\Throwable $e) {
             Notification::make()
@@ -91,7 +91,7 @@ class ImportStudents extends Page implements HasForms
             return;
         }
 
-        // Optionally delete file after import
+        // Delete uploaded file after import
         Storage::delete($file);
 
         Notification::make()

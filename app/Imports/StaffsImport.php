@@ -46,6 +46,7 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'password'     => $hashedTempPassword,
                 'profile_type' => 'App\\Models\\Staff',
                 'status'       => 'Pending Activation',
+                'role'         => $row['access_level'],
             ]);
 
             // Step 2: Assign role using Spatie's assignRole method

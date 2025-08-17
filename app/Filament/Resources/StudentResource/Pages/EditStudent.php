@@ -7,6 +7,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+
 use App\Models\Student;
 use App\Enum\AcademicEnum;
 
@@ -54,16 +56,39 @@ class EditStudent extends EditRecord
     {
         $user = $student->user;
 
+        $token = Str::uuid();
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
-            'token'              => Str::uuid(),
+            'token'              => $token,
             'temp_hash_password' => Hash::make($tempPassword),
             'password'           => $tempPassword,
             'is_active'          => 'yes',
             'created_at'         => now(),
             'updated_at'         => now(),
         ]);
+
+        // $link = url('/login?token=' . $token);
+
+        // Mail::raw("
+        // Thank you for registering with us.
+
+        // Below are your login credentials:
+
+        // Student name: {$user->name}
+        // User ID: {$user->email}
+        // Temporary Password: {$tempPassword}
+        // Link: {$link}
+
+        // Thank you,
+        // SMS Support Team
+        // ", function ($message) use ($user) {
+        //     $message->to('aishah@nugeosolutions.com') 
+        //             ->subject('Your SMS Account Credentials');
+        // });
+
+        \Log::info("Registration email triggered for {$user->email}");
+
     }
 
     protected function afterSave(): void

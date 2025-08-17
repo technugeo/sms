@@ -9,6 +9,8 @@ use App\Models\Course;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+
 
 class CreateStudent extends CreateRecord
 {
@@ -38,6 +40,40 @@ class CreateStudent extends CreateRecord
 
         return $password;
     }
+
+    // protected function sendRegistrationEmail(User $user, string $tempPassword): void
+    // {
+    //     // Insert password reset token record
+    //     $token = Str::uuid();
+    //     \DB::table('password_reset_tokens')->insert([
+    //         'user_id'            => $user->id,
+    //         'email'              => $user->email,
+    //         'token'              => $token,
+    //         'temp_hash_password' => Hash::make($tempPassword),
+    //         'temp_password'      => $tempPassword,
+    //         'is_active'          => 'yes',
+    //         'created_at'         => now(),
+    //         'updated_at'         => now(),
+    //     ]);
+
+    //     $link = url('/login?token=' . $token);
+
+    //     Mail::raw("
+    //     Thank you for registering with us.
+
+    //     Below are your login credentials:
+
+    //     User ID: {$user->email}
+    //     Temporary Password: {$tempPassword}
+    //     Link: {$link}
+
+    //     Thank you,
+    //     SMS Support Team
+    //     ", function ($message) use ($user) {
+    //         $message->to('aishah@nugeosolutions.com') 
+    //                 ->subject('Your SMS Account Credentials');
+    //     });
+    // }
 
     protected function handleRecordCreation(array $data): Student
     {
@@ -86,6 +122,10 @@ class CreateStudent extends CreateRecord
             'updated_at'         => now(),
         ]);
 
+        if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
+            $this->sendRegistrationEmail($user, $tempPassword);
+        }
+        
         return $student;
     }
 }
