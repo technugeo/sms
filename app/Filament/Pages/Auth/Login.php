@@ -112,6 +112,17 @@ class Login extends BaseLogin
             'user_status' => $user->status,
         ]);
 
+        DB::table('audit_log')->insert([
+            'action_by' => $user->email,
+            'action_type' => 'login',
+            'module' => 'auth',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time' => now(),
+            'notes' => 'User logged in successfully',
+        ]);
+        
+
 
         if ($this->token) {
             $hasActiveToken = DB::table('password_reset_tokens')

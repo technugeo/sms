@@ -110,6 +110,17 @@ class CreateStudent extends CreateRecord
 
         $student = Student::create($data);
 
+        \DB::table('audit_log')->insert([
+            'action_by' => auth()->user()->email ?? 'system',
+            'action_type' => 'create',
+            'module' => 'student',
+            'record_id' => $student->id, // optional, to reference the student record
+            'notes' => 'Student ' . $student->full_name . ' created with matric ID ' . $student->matric_id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time' => now(),
+        ]);
+
         // Save temp password in a separate table
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('prog_code');
             $table->string('semester_code');
             $table->string('semester_name');
+            
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('deleted_by');
