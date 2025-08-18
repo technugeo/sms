@@ -49,25 +49,34 @@ class StudentResource extends Resource
      */
     public static function getNavigationItems(): array
     {
-        $items = [];
-
         $user = auth()->user();
 
-        // Only add My Profile for students
-        if ($user && $user->hasRole('S')) {
-            $student = \App\Models\Student::where('email', $user->email)->first();
+        $items = [];
+
+        if ($user->hasRole('S')) {
+            // Student sees "My Profile"
+            $student = Student::where('email', $user->email)->first();
 
             if ($student) {
                 $items[] = NavigationItem::make('My Profile')
                     ->icon('heroicon-o-user-circle')
                     ->url(StudentResource::getUrl('view', ['record' => $student->getKey()]))
-                    ->group('User Management') // <-- add group here
-                    ->sort(1); // adjust sort order as needed
+                    ->group('User Management')
+                    ->sort(1);
             }
+        } else {
+            // Admins see regular Student menu
+            $items[] = NavigationItem::make('Students')
+                ->icon(static::$navigationIcon)
+                ->group(static::getNavigationGroup())
+                ->sort(static::getNavigationSort())
+                ->url(static::getUrl('index'));
         }
 
         return $items;
     }
+
+
 
 
 
