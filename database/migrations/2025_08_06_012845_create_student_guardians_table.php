@@ -27,6 +27,11 @@ return new class extends Migration
             $table->string('occupation')->nullable();
             $table->integer('monthly_income');
             $table->enum('is_emergency_contact', ['yes', 'no'])->default('no');
+
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
+            
             $table->timestamps();
             $table->softDeletes();
         });

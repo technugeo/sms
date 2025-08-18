@@ -19,13 +19,13 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('address');
             $table->string('phone_number');
-            $table->string('alt_phone_number');
+            $table->string('alt_phone_number')->nullable();
 
             $table->enum('is_primary', ['yes', 'no'])->default('yes');
 
-            $table->integer('created_by');
-            $table->integer('updated_by');
-            $table->integer('deleted_by');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

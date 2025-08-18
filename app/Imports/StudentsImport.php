@@ -73,10 +73,10 @@ class StudentsImport implements ToCollection, WithHeadingRow
 
         // Generate matricId
         $course = Course::where('prog_code', $row['course_code'])->first();
-        $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '00';
+        $progCode = $course ? str_pad($course->prog_code, 2, '0', STR_PAD_LEFT) : '0';
         $runningNo = str_pad($user->id, 3, '0', STR_PAD_LEFT);
         $intake = substr($row['intake_year'], 2, 2) . $this->convertMonthNameToNumber($row['intake_month']);
-        $matricId = 'FIM12' . $progCode . $runningNo . $intake;
+        $matricId =  $progCode . $runningNo . $intake;
 
         // Create student
         $student = Student::create([

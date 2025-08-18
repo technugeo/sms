@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('student', function (Blueprint $table) {
             $table->softDeletes()->after('updated_at'); // Adds deleted_at column
+            $table->unsignedBigInteger('address_id')->nullable(false)->after('nationality');
         });
     }
 
