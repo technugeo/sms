@@ -22,6 +22,8 @@ use App\Enum\StatusEnum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\MultiSelect;
+
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -132,15 +134,18 @@ class StaffResource extends Resource
                     ->required()
                     ->options(StaffTypeEnum::class),
 
-                Forms\Components\Select::make('access_level')
-                    ->label('Role')
-                    ->required()
-                    ->options(function () {
-                        return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
-                    })
-                    ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
+                // Forms\Components\Select::make('access_level')
+                //     ->label('Role')
+                //     ->required()
+                //     ->options(function () {
+                //         return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
+                //     })
+                //     ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
 
-
+                Forms\Components\MultiSelect::make('user.roles')
+                    ->label('Roles')
+                    ->relationship('roles', 'name') // points to $staff->user->roles
+                    ->preload(),
 
 
                 Forms\Components\TextInput::make('position'),

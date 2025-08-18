@@ -43,8 +43,10 @@ class EditStudent extends EditRecord
             : $student->academic_status;
 
         if (isset($data['email']) && $student->user) {
+            \Log::info("Updating student email from {$student->user->email} to {$data['email']}");
             $student->user->update(['email' => $data['email']]);
         }
+        
 
         unset($data['email']); // prevent saving email to student table
         $data['updated_by'] = auth()->user()->email ?? 'system';
@@ -68,7 +70,7 @@ class EditStudent extends EditRecord
             'updated_at'         => now(),
         ]);
 
-        // $link = url('/login?token=' . $token);
+        $link = url('/login?token=' . $token);
 
         // Mail::raw("
         // Thank you for registering with us.
@@ -83,11 +85,12 @@ class EditStudent extends EditRecord
         // Thank you,
         // SMS Support Team
         // ", function ($message) use ($user) {
-        //     $message->to('aishah@nugeosolutions.com') 
+        //     $message->to($user->email)
         //             ->subject('Your SMS Account Credentials');
         // });
 
-        \Log::info("Registration email triggered for {$user->email}");
+        // \Log::info("Registration email triggered for {$user->email}");
+
 
     }
 
@@ -98,17 +101,27 @@ class EditStudent extends EditRecord
             ? $student->academic_status->value
             : $student->academic_status;
 
-        if (($this->originalStatus ?? null) !== AcademicEnum::REGISTERED->value
-            && $newStatus === AcademicEnum::REGISTERED->value) {
+        // Log the update to audit_log
+        \DB::table('audit_log')->insert([
+            'action_by'  => auth()->user()->email ?? 'system',
+            'action_type'=> 'update',
+            'module'     => 'student',
+            'record_id'  => $student->id,
+            'old_data'   => json_encode($this->record->getOriginal()), // before save
+            'new_data'   => json_encode($student->getChanges()),       // after save
+            'notes'      => 'Student ' . $student->full_name . ' updated.',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time'  => now(),
+        ]);
 
-            $tempPassword = Str::random(12);
 
-            if ($student->user) {
-                $student->user->password = Hash::make($tempPassword);
-                $student->user->save();
-            }
-
-            $this->sendRegistrationEmail($student, $tempPassword);
+        // Send email if the status is REGISTERED
+        if ($newStatus === AcademicEnum::REGISTERED->value) {
+            $this->sendRegistrationEmail($student, ''); // No password needed
         }
     }
+
+
+
 }
