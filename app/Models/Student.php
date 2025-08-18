@@ -129,6 +129,12 @@ class Student extends Model
         return $this->hasMany(StudentEmergencyContact::class, 'matric_id', 'matric_id');
     }
 
+    public function eduHistories()
+    {
+        return $this->hasMany(StudentEduhistory::class, 'matric_id', 'matric_id');
+    }
+
+
 
     
 

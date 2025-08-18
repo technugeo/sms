@@ -263,6 +263,7 @@ class StudentResource extends Resource
             RelationManagers\ForeignAddressRelationManager::class,
             RelationManagers\GuardianRelationManager::class,
             RelationManagers\EmergencyContactRelationManager::class,
+            RelationManagers\StudentEduhistoryRelationManager::class,
         ];
     }
 
