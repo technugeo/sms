@@ -1,0 +1,31 @@
+services:
+  fim:
+    build: .
+    container_name: fim
+    user: "www-data:www-data"
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    networks:
+      - nusmart-net
+
+  fim-nginx:
+    image: nginx:alpine
+    container_name: fim-nginx
+    restart: unless-stopped
+    depends_on:
+      - fim
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - nusmart-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fim-dev.rule=Host(`fim-dev.nusmart.my`)"
+      - "traefik.http.routers.fim-dev.entrypoints=web"
+      - "traefik.http.services.fim-dev.loadbalancer.server.port=80"
+
+networks:
+  nusmart-net:
+    external: true
