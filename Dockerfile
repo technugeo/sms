@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_mysql gd zip \
     && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/custom.ini
 
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 WORKDIR /var/www/html
 COPY . /var/www/html
 
