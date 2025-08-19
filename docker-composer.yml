@@ -22,9 +22,9 @@ services:
       - nusmart-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fim-dev.rule=Host(`fim-dev.nusmart.my`)"
-      - "traefik.http.routers.fim-dev.entrypoints=web"
-      - "traefik.http.services.fim-dev.loadbalancer.server.port=80"
+      - "traefik.http.routers.fim.rule=Host(`fim-dev.nusmart.my`)"
+      - "traefik.http.routers.fim.entrypoints=websecure"
+      - "traefik.http.routers.fim.tls.certresolver=le"
 
 networks:
   nusmart-net:
