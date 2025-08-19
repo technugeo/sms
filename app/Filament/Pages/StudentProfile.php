@@ -18,10 +18,10 @@ class StudentProfile extends ViewRecord
     // Hide from sidebar navigation
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function canAccess(array $parameters = []): bool
-    {
-        return auth()->check() && auth()->user()->hasRole('S');
-    }
+    // public static function canAccess(array $parameters = []): bool
+    // {
+    //     return auth()->check() && auth()->user()->hasRole('S');
+    // }
 
     public function mount(string|int $record = null): void
     {

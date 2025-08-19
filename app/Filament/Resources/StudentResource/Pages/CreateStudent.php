@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 
-
 class CreateStudent extends CreateRecord
 {
     protected static string $resource = StudentResource::class;
@@ -41,39 +40,47 @@ class CreateStudent extends CreateRecord
         return $password;
     }
 
-    // protected function sendRegistrationEmail(User $user, string $tempPassword): void
-    // {
-    //     // Insert password reset token record
-    //     $token = Str::uuid();
-    //     \DB::table('password_reset_tokens')->insert([
-    //         'user_id'            => $user->id,
-    //         'email'              => $user->email,
-    //         'token'              => $token,
-    //         'temp_hash_password' => Hash::make($tempPassword),
-    //         'temp_password'      => $tempPassword,
-    //         'is_active'          => 'yes',
-    //         'created_at'         => now(),
-    //         'updated_at'         => now(),
-    //     ]);
+    protected function sendRegistrationEmail(User $user, string $tempPassword, string $token): void
+    {
+        $link = url('/login?token=' . $token);
 
-    //     $link = url('/login?token=' . $token);
+        Mail::html("
+        <p>Hello <strong>{$user->name}</strong>,</p>
 
-    //     Mail::raw("
-    //     Thank you for registering with us.
+        <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
+        Your student account has been successfully created.</p>
 
-    //     Below are your login credentials:
+        <p><strong>Please find your login details below:</strong><br>
+        <strong>Student Name:</strong> {$user->name}<br>
+        <strong>User ID (Email):</strong> {$user->email}<br>
+        <strong>Temporary Password:</strong> {$tempPassword}</p>
 
-    //     User ID: {$user->email}
-    //     Temporary Password: {$tempPassword}
-    //     Link: {$link}
+        <p style=\"text-align: center;\">
+            <a href=\"{$link}\" 
+            style=\"
+                    display: inline-block;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    color: #ffffff;
+                    background-color: #007bff;
+                    text-decoration: none;
+                    border-radius: 5px;
+            \">
+            Click here to Login
+            </a>
+        </p>
 
-    //     Thank you,
-    //     SMS Support Team
-    //     ", function ($message) use ($user) {
-    //         $message->to('aishah@nugeosolutions.com') 
-    //                 ->subject('Your SMS Account Credentials');
-    //     });
-    // }
+        <p><strong>Important:</strong><br>
+        You will be required to update your password immediately after your first login.<br>
+        Do not share your login credentials with anyone.</p>
+
+        <p>Thank you,<br>
+        NuSmart Support Team</p>
+        ", function ($message) use ($user) {
+            $message->to($user->email)
+                    ->subject('Student - Account Credentials');
+        });
+    }
 
     protected function handleRecordCreation(array $data): Student
     {
@@ -88,11 +95,11 @@ class CreateStudent extends CreateRecord
             'name'         => $data['full_name'],
             'email'        => $data['email'],
             'profile_type' => Student::class,
-            'role'         => 'S', // Student role
+            'role'         => 'student',
             'password'     => $hashedTempPassword,
         ]);
 
-        $user->assignRole('S');
+        $user->assignRole('student');
 
         // Generate matricId
         $course = Course::where('prog_code', $data['current_course'])->first();
@@ -114,18 +121,19 @@ class CreateStudent extends CreateRecord
             'action_by' => auth()->user()->email ?? 'system',
             'action_type' => 'create',
             'module' => 'student',
-            'record_id' => $student->id, // optional, to reference the student record
+            'record_id' => $student->id,
             'notes' => 'Student ' . $student->full_name . ' created with matric ID ' . $student->matric_id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'date_time' => now(),
         ]);
 
-        // Save temp password in a separate table
+        // Always save temp password in password_reset_tokens
+        $token = Str::uuid();
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
-            'token'              => Str::uuid(),
+            'token'              => $token,
             'temp_hash_password' => $hashedTempPassword,
             'password'           => $tempPassword,
             'is_active'          => 'yes',
@@ -133,10 +141,11 @@ class CreateStudent extends CreateRecord
             'updated_at'         => now(),
         ]);
 
+        // Send email only if status is Registered
         if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
-            $this->sendRegistrationEmail($user, $tempPassword);
+            $this->sendRegistrationEmail($user, $tempPassword, $token);
         }
-        
+
         return $student;
     }
 }

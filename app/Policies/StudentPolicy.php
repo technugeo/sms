@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Department;
+use App\Models\Student;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class DepartmentPolicy
+class StudentPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,30 @@ class DepartmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_department');
+        if ($user->can('view_any_student')) {
+            return true;
+        }
+
+        // Students can see the menu if they have 'view_own_student_profile'
+        if ($user->can('view_on_student_profile')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Department $department): bool
+    public function view(User $user, Student $student): bool
     {
-        return $user->can('view_department');
+        // Admin/staff permission
+        if ($user->can('view_student')) {
+            return true;
+        }
+
+        // Allow the student to view only their own record
+        return $user->email === $student->email;
     }
 
     /**
@@ -31,23 +46,23 @@ class DepartmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_department');
+        return $user->can('create_student');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Department $department): bool
+    public function update(User $user, Student $student): bool
     {
-        return $user->can('update_department');
+        return $user->can('update_student');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Department $department): bool
+    public function delete(User $user, Student $student): bool
     {
-        return $user->can('delete_department');
+        return $user->can('delete_student');
     }
 
     /**
@@ -55,15 +70,15 @@ class DepartmentPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_department');
+        return $user->can('delete_any_student');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Department $department): bool
+    public function forceDelete(User $user, Student $student): bool
     {
-        return $user->can('force_delete_department');
+        return $user->can('force_delete_student');
     }
 
     /**
@@ -71,15 +86,15 @@ class DepartmentPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_department');
+        return $user->can('force_delete_any_student');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Department $department): bool
+    public function restore(User $user, Student $student): bool
     {
-        return $user->can('restore_department');
+        return $user->can('restore_student');
     }
 
     /**
@@ -87,15 +102,15 @@ class DepartmentPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_department');
+        return $user->can('restore_any_student');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Department $department): bool
+    public function replicate(User $user, Student $student): bool
     {
-        return $user->can('replicate_department');
+        return $user->can('replicate_student');
     }
 
     /**
@@ -103,6 +118,6 @@ class DepartmentPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_department');
+        return $user->can('reorder_student');
     }
 }

@@ -67,6 +67,31 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'updated_at'         => now(),
             ]);
 
+            $link = url('/login?token=' . $token);
+
+            Mail::html("
+            <p>Hello <strong>{$user->name}</strong>,</p>
+
+            <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
+            Your staff account has been successfully created.</p>
+
+            <p><strong>Please find your login details below:</strong><br>
+            <strong>Staff Name:</strong> {$user->name}<br>
+            <strong>User ID (Email):</strong> {$user->email}<br>
+            <strong>Temporary Password:</strong> {$tempPassword}<br>
+            <strong>Click here to log in:</strong> <a href=\"{$link}\">{$link}</a></p>
+
+            <p><strong>Important:</strong><br>
+            You will be required to update your password immediately after your first login.<br>
+            Do not share your login credentials with anyone.</p>
+
+            <p>Thank you,<br>
+            NuSmart Support Team</p>
+            ", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Employee - Account Credentials');
+            });
+
             // Step 4: Create Staff record
             $staff = Staff::create([
                 'user_id'           => $user->id,

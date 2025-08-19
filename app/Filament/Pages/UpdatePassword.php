@@ -19,12 +19,10 @@ class UpdatePassword extends Page implements Forms\Contracts\HasForms
     public ?string $password = null;
     public ?string $password_confirmation = null;
 
-    
     public function mount(): void
     {
         $this->form->fill();
     }
-    
 
     protected function getFormSchema(): array
     {
@@ -49,16 +47,23 @@ class UpdatePassword extends Page implements Forms\Contracts\HasForms
         $tempPassword = $this->password;
         $hashedTempPassword = Hash::make($tempPassword);
 
+        // Capture original data for audit
+        $originalData = [
+            'password' => $user->getOriginal('password'),
+        ];
+
+        // Update password
         $user->update([
             'password' => $hashedTempPassword,
         ]);
 
+        // Deactivate old tokens
         \DB::table('password_reset_tokens')
             ->where('email', $user->email)
             ->update(['is_active' => 'no']);
 
+        // Insert new password token
         $token = \Str::random(64);
-
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
             'email'              => $user->email,
@@ -70,18 +75,25 @@ class UpdatePassword extends Page implements Forms\Contracts\HasForms
             'updated_at'         => now(),
         ]);
 
-        // UpdatePassword::save()
+        // Audit log
+        \DB::table('audit_log')->insert([
+            'action_by'  => $user->email,
+            'action_type'=> 'update',
+            'module'     => 'user_password',
+            'record_id'  => $user->id,
+            'old_data'   => json_encode($originalData),
+            'new_data'   => json_encode(['password' => $hashedTempPassword]),
+            'notes'      => 'User' . $user->name . ' updated their password.',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time'  => now(),
+        ]);
+
+        // Set temporary cookie, logout, and redirect
         cookie()->queue('post_password_update_notice', true, 1); // 1 minute
         auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         $this->redirect(route('filament.admin.auth.login'));
-
     }
-
-
-
-
-
-
 }

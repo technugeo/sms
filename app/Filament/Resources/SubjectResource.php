@@ -22,10 +22,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class SubjectResource extends Resource
 {
     
-    public static function canAccess(): bool
-    {
-        return auth()->check() && auth()->user()->hasRole('SA');
-    }
 
     protected static ?string $model = Subject::class;
 

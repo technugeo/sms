@@ -16,7 +16,7 @@ return new class extends Migration
                 ->default('Active')
                 ->after('access_level');
 
-            $table->enum('staff_type', ['Full-time', 'Contract', 'Intern'])
+            $table->enum('staff_type',array_column(\App\Enum\StaffTypeEnum::cases(), 'value'))
                 ->default('full-time')
                 ->after('employment_status');
 

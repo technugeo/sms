@@ -23,10 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InstituteResource extends Resource
 {
-    public static function canAccess(): bool
-    {
-        return auth()->check() && auth()->user()->hasRole('SA');
-    }
+   
 
     protected static ?string $model = Institute::class;
 
@@ -132,8 +129,7 @@ class InstituteResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('dun')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                    
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
