@@ -4,7 +4,7 @@ services:
   fim:
     build: .
     container_name: fim
-    user: "33:33"
+    user: "www-data:www-data"
     restart: unless-stopped
     volumes:
       - .:/var/www/html
@@ -18,13 +18,12 @@ services:
     depends_on:
       - fim
     volumes:
-      - .:/var/www/html # Peta seluruh projek ke dalam kontena
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:rw
-      - droplet-docker-base_nginx_html_vol:/usr/share/nginx/html:rw
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     environment:
       - VIRTUAL_HOST=fim-dev.nusmart.my
       - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=fim-dev.nusmart.my
+    #  - LETSENCRYPT_HOST=fim-dev.nusmart.my
     networks:
       - nusmart-net
 
@@ -32,7 +31,3 @@ networks:
   nusmart-net:
     external: true
     name: nusmart-net
-
-volumes:
-    droplet-docker-base_nginx_html_vol:
-     external: true
