@@ -19,7 +19,7 @@ services:
       - fim
     volumes:
       - .:/var/www/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:rw
     environment:
       - VIRTUAL_HOST=fim-dev.nusmart.my
       - VIRTUAL_PORT=80
