@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Http\Middleware\TrustProxies as Middleware;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrustProxies extends Middleware
@@ -15,22 +15,17 @@ class TrustProxies extends Middleware
      *
      * @var array|string|null
      */
-    protected $proxies = '*'; // percaya semua proxy (Traefik)
+    protected $proxies = '*'; // <-- Ubah baris ini
 
     /**
-     * The headers that should be used to detect proxies.
+     * The headers that should be trusted.
      *
      * @var int
      */
-    protected $headers = 0b1111; // HEADER_X_FORWARDED_ALL diganti integer
-
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
-        return $next($request);
-    }
+    protected $headers =
+        Request::HEADER_X_FORWARDED_FOR |
+        Request::HEADER_X_FORWARDED_HOST |
+        Request::HEADER_X_FORWARDED_PORT |
+        Request::HEADER_X_FORWARDED_PROTO |
+        Request::HEADER_X_FORWARDED_AWS_ELB;
 }
