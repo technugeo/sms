@@ -35,4 +35,4 @@ networks:
 
 volumes:
     nginx_html_vol:
-        external: true
+     external: true
