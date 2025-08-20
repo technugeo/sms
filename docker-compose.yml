@@ -20,6 +20,7 @@ services:
     volumes:
       - .:/var/www/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./html:/usr/share/nginx/html:rw
     environment:
       - VIRTUAL_HOST=fim-dev.nusmart.my
       - VIRTUAL_PORT=80
