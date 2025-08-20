@@ -23,7 +23,7 @@ services:
     environment:
       - VIRTUAL_HOST=fim-dev.nusmart.my
       - VIRTUAL_PORT=80
-    #  - LETSENCRYPT_HOST=fim-dev.nusmart.my
+      - LETSENCRYPT_HOST=fim-dev.nusmart.my
     networks:
       - nusmart-net
 
