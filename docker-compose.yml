@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   fim:
     build: .
@@ -18,16 +20,13 @@ services:
     volumes:
       - .:/var/www/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      - VIRTUAL_HOST=fim-dev.nusmart.my
+      - VIRTUAL_PORT=80
     networks:
       - nusmart-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.fim.rule=Host(`fim-dev.nusmart.my`)"
-      - "traefik.http.routers.fim.entrypoints=websecure"
-      - "traefik.http.routers.fim.tls.certresolver=le"
-      - "traefik.http.services.fim.loadbalancer.server.port=80"
 
 networks:
   nusmart-net:
     external: true
-    attachable: true
+    name: nusmart-net
