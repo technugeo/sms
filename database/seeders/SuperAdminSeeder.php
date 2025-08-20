@@ -115,7 +115,6 @@ class SuperAdminSeeder extends Seeder
             'reorder_student::guardian',
             'delete_student::guardian',
             'delete_any_student::guardian',
-            'view_on_student_profile',
             'view_on_staff_profile',
         ];
 
