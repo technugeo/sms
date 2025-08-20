@@ -4,7 +4,7 @@ services:
   fim:
     build: .
     container_name: fim
-    user: "33:33:wq"
+    user: "33:33"
     restart: unless-stopped
     volumes:
       - .:/var/www/html
