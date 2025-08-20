@@ -111,7 +111,6 @@ class StudentResource extends Resource
                 Forms\Components\TextInput::make('full_name')->required(),
 
                 Forms\Components\TextInput::make('nric')
-                    ->required()
                     ->maxLength(12),
 
                 Forms\Components\TextInput::make('email')
@@ -287,13 +286,14 @@ class StudentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\LocalAddressRelationManager::class,
-            RelationManagers\ForeignAddressRelationManager::class,
-            RelationManagers\GuardianRelationManager::class,
-            RelationManagers\EmergencyContactRelationManager::class,
-            RelationManagers\StudentEduhistoryRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\LocalAddressRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\ForeignAddressRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\GuardianRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\EmergencyContactRelationManager::class,
+            \App\Filament\Resources\StudentResource\RelationManagers\StudentEduhistoryRelationManager::class,
         ];
     }
+
 
     public static function getPages(): array
     {

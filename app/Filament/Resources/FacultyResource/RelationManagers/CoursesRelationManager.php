@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\DepartmentResource\RelationManagers;
+namespace App\Filament\Resources\FacultyResource\RelationManagers;
 
 use App\Enum\ProgrammeEnum;
 use App\Enum\StatusEnum;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -82,8 +84,8 @@ class CoursesRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['faculty_id'] = $this->ownerRecord->faculty_id ?? null;
-                        $data['created_by'] = auth()->user()->email; // or id
+                        $data['faculty_id'] = $this->ownerRecord->id; // ✅ correct
+                        $data['created_by'] = auth()->user()->email;
                         $data['updated_by'] = auth()->user()->email;
 
                         return $data;
@@ -91,6 +93,7 @@ class CoursesRelationManager extends RelationManager
                     ->using(function (array $data) {
                         return $this->getRelationship()->create($data);
                     }),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

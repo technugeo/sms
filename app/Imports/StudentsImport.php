@@ -127,7 +127,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
             'intake_month'     => $row['intake_month'],
             'intake_year'      => $row['intake_year'],
             'full_name'        => $row['full_name'],
-            'nric'             => $row['nric'],
+            'nric'             => $row['nric'] ?? null,
             'email'            => $row['email'],
             'phone_number'     => $row['phone_number'],
             'nationality'      => $row['nationality'],

@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+
 
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -93,26 +95,26 @@ class StaffsImport implements ToCollection, WithHeadingRow
             });
 
             // Step 4: Create Staff record
-            $staff = Staff::create([
-                'user_id'           => $user->id,
-                'institute_id'      => $row['mqa_institute_id'] ?? null,
-                'department_id'     => $row['department_id'] ?? null,
-                'full_name'         => $row['full_name'],
-                'nric'              => $row['nric'],
-                'email'             => $row['email'] ?? $user->email,
-                'phone_number'      => $row['phone_number'] ?? null,
-                'passport_no'       => $row['passport_no'] ?? null,
-                'gender'            => $row['gender'] ?? null,
-                'marriage_status'   => $row['marriage_status'] ?? null,
-                'race'              => $row['race'] ?? null,
-                'religion'          => $row['religion'] ?? null,
-                'citizen'           => $row['citizen'] ?? null,
-                'nationality'       => $row['nationality'] ?? 'Malaysia', 
-                'nationality_type'  => $row['nationality_type'] ?? null,
-                'access_level'      => $row['access_level'] ?? null,
-                'position'          => $row['position'] ?? null,
-                'staff_type'        => $row['staff_type'] ?? null,
-                'employment_status' => $row['employment_status'] ?? null,
+            $role = Role::where('name', $row['access_level'])->first();
+
+            Staff::create([
+                'institute_id' => $row['mqa_institute_id'],
+                'department_id' => $row['department_id'],
+                'full_name' => $row['full_name'],
+                'nric' => $row['nric'],
+                'email' => $row['email'],
+                'phone_number' => $row['phone_number'],
+                'gender' => $row['gender'],
+                'marriage_status' => $row['marriage_status'],
+                'race' => $row['race'],
+                'religion' => $row['religion'],
+                'citizen' => $row['citizen'],
+                'nationality_type' => $row['nationality_type'],
+                'role_id' => $role ? $role->id : null,  
+                'position' => $row['position'],
+                'nationality' => $row['nationality'],
+                'staff_type' => $row['staff_type'],
+                'employment_status' => $row['employment_status'],
             ]);
 
             // Step 5: Update User's profile_id to link back to Staff

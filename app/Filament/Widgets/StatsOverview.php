@@ -8,8 +8,16 @@ use App\Models\Staff;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
+use Illuminate\Support\Facades\Auth;
+
 class StatsOverview extends BaseWidget
-{
+{   
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('widget_StatsOverview') ?? false;
+    }
+
+
     protected function getStats(): array
     {
         $todayUsers = User::whereDate('created_at', today())->count();

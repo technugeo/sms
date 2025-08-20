@@ -76,6 +76,14 @@ class Student extends Model
                 }
             }
         });
+
+        static::restoring(function ($student) {
+        if ($student->user) {
+            $student->user->updateQuietly([
+                'status' => 'ACTIVATED', // or whatever your active status is
+            ]);
+        }
+    });
     }
 
 

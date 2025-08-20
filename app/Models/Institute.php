@@ -68,6 +68,11 @@ class Institute extends Model
     {
         return $this->hasMany(Department::class, 'institute_id', 'mqa_institute_id');
     }
+    public function faculty()
+    {
+        return $this->hasMany(Faculty::class, 'institute_code', 'mqa_institute_id');
+    }
+
 
         
 

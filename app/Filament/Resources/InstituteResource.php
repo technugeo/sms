@@ -164,6 +164,7 @@ class InstituteResource extends Resource
     {
         return [
             RelationManagers\DepartmentsRelationManager::class,
+            RelationManagers\FacultyRelationManager::class,
         ];
     }
 

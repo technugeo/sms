@@ -6,10 +6,10 @@ use App\Filament\Resources\StaffResource;
 use App\Models\Staff;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
-
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Permission\Models\Role;
 
 class CreateStaff extends CreateRecord
 {
@@ -36,9 +36,9 @@ class CreateStaff extends CreateRecord
         $tempPassword = $this->generateTempPassword();
         $hashedTempPassword = Hash::make($tempPassword);
 
-        // Step 1: Determine roles from form
-        $roles = $data['user']['roles'] ?? ['student']; // fallback role
-        $primaryRole = $roles[0]; // first role as the primary
+        // Step 1: Determine primary role from form
+        $roles = $data['user']['roles'] ?? [];
+        $primaryRole = $roles[0] ?? 'non_academic_officer'; // fallback if empty
 
         // Step 2: Create User
         $user = User::create([
@@ -47,27 +47,38 @@ class CreateStaff extends CreateRecord
             'password'     => $hashedTempPassword,
             'profile_type' => 'App\\Models\\Staff',
             'status'       => 'Pending Activation',
-            'role'         => $primaryRole, // set the users.role column
+            'role'         => $primaryRole, // string role, required
         ]);
 
         // Step 3: Sync roles in model_has_roles
         $user->syncRoles($roles);
 
-        // Step 4: Prepare Staff data
-        $data['user_id']     = $user->id;
-        $data['full_name']   = $data['name'];
-        $data['email']       = $user->email;
-        $data['nationality'] = $data['nationality'] ?? 'Malaysia';
-        unset($data['name'], $data['user']); // remove "user" array so Staff::create won't fail
+        // Step 4: Handle department/faculty
+        $data['department_id'] = ($data['department_id'] ?? '') === 'N/A' ? null : $data['department_id'];
+        $data['faculty_id']    = ($data['faculty_id'] ?? '') === 'N/A' ? null : $data['faculty_id'];
 
-        // Step 5: Create Staff
+        // Force department null for academic_officer
+        if ($primaryRole === 'academic_officer') {
+            $data['department_id'] = null;
+        }
+
+        // Step 5: Prepare remaining staff data
+        $data['user_id']   = $user->id;
+        $data['full_name'] = $data['name'];
+        $data['email']     = $user->email;
+        $data['nationality'] = $data['nationality'] ?? 'Malaysia';
+        $data['role'] = $primaryRole; // save string role in staff table
+
+        unset($data['name'], $data['user']); // remove 'user' to prevent mass assignment error
+
+        // Step 6: Create Staff
         $staff = Staff::create($data);
 
-        // Step 6: Update User with profile_id
+        // Step 7: Update User with profile_id
         $user->profile_id = $staff->id;
         $user->save();
 
-        // Step 7: Insert password reset token
+        // Step 8: Insert password reset token
         $token = Str::uuid();
         \DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
@@ -82,7 +93,7 @@ class CreateStaff extends CreateRecord
 
         $link = url('/login?token=' . $token);
 
-        // Step 8: Send email
+        // Step 9: Send email
         Mail::html("
         <p>Hello <strong>{$user->name}</strong>,</p>
 
@@ -120,17 +131,21 @@ class CreateStaff extends CreateRecord
                     ->subject('Employee - Account Credentials');
         });
 
+        // Step 10: Audit log
         \DB::table('audit_log')->insert([
-            'action_by' => auth()->user()->email ?? 'system',
+            'action_by'   => auth()->user()->email ?? 'system',
             'action_type' => 'create',
-            'module' => 'staff',
-            'record_id' => $staff->id,
-            'notes' => 'Staff ' . $staff->full_name . ' created.',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'date_time' => now(),
+            'module'      => 'staff',
+            'record_id'   => $staff->id,
+            'notes'       => 'Staff ' . $staff->full_name . ' created.',
+            'ip_address'  => request()->ip(),
+            'user_agent'  => request()->userAgent(),
+            'date_time'   => now(),
         ]);
 
         return $staff;
     }
+
+
+
 }

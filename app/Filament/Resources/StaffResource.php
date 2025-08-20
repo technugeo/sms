@@ -76,111 +76,136 @@ class StaffResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Full Name')
-                    ->required(),
 
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required(),
-                Forms\Components\TextInput::make('phone_number')
-                    ->tel()
-                    ->required()
-                    ->numeric()
-                    ->rule('digits_between:10,11'),
-                Forms\Components\TextInput::make('nric')
-                    ->required()
-                    ->maxLength(12),
+                Forms\Components\Section::make('Basic Information')
+                    ->description('Personal details of the staff')
+                    ->columns(2) // 2-column grid
+                    ->schema([
+                        Forms\Components\TextInput::make('full_name')
+                            ->label('Full Name')
+                            ->required(),
 
-                
-                Forms\Components\Select::make('nationality')
-                    ->label('Nationality')
-                    ->options(Country::pluck('name', 'name')->toArray())
-                    ->required()
-                    ->searchable(),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required(),
 
-                Forms\Components\Select::make('nationality_type')
-                    ->required()
-                    ->options(NationalityEnum::class),
+                        Forms\Components\TextInput::make('phone_number')
+                            ->tel()
+                            ->required()
+                            ->numeric()
+                            ->rule('digits_between:10,11'),
 
-                Forms\Components\Select::make('citizen')
-                    ->label('Bumiputera')
-                    ->required()
-                    ->options(CitizenEnum::class),
-                // Forms\Components\TextInput::make('citizen')
-                //     ->required(),
-                // Forms\Components\TextInput::make('marriage_status')
-                //     ->required(),
-                Forms\Components\Select::make('marriage_status')
-                    ->required()
-                    ->options(MarriageEnum::class),
-                // Forms\Components\TextInput::make('gender')
-                //     ->required(),
-                Forms\Components\Select::make('gender')
-                    ->required()
-                    ->options(GenderEnum::class),
-                // Forms\Components\TextInput::make('address_id')
-                //     ->required()
-                //     ->numeric(),
+                        Forms\Components\TextInput::make('nric')
+                            ->required()
+                            ->maxLength(12),
 
-                Forms\Components\Select::make('race')
-                    ->required()
-                    ->options(RaceEnum::class),
+                        Forms\Components\Select::make('nationality')
+                            ->label('Nationality')
+                            ->options(Country::pluck('name', 'name')->toArray())
+                            ->required()
+                            ->searchable(),
 
-                Forms\Components\Select::make('religion')
-                    ->required()
-                    ->options(ReligionEnum::class),
-                    
-                Forms\Components\Select::make('institute_id')
-                    ->relationship('institute', 'name')
-                    ->required()
-                    ->reactive(),
-                    // ->columnSpanFull(),
+                        Forms\Components\Select::make('nationality_type')
+                            ->required()
+                            ->options(NationalityEnum::class),
 
-                Forms\Components\Select::make('department_id')
-                    ->label('Department')
-                    ->required()
-                    ->reactive()
-                    ->options(function (callable $get) {
-                        $instituteId = $get('institute_id');
-                        if (!$instituteId) {
-                            return []; 
-                        }
-                        return \App\Models\Department::where('institute_id', $instituteId)
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    }),
+                        Forms\Components\Select::make('citizen')
+                            ->label('Bumiputera')
+                            ->required()
+                            ->options(CitizenEnum::class),
 
-                Forms\Components\Select::make('staff_type')
-                    ->required()
-                    ->options(StaffTypeEnum::class),
+                        Forms\Components\Select::make('marriage_status')
+                            ->required()
+                            ->options(MarriageEnum::class),
 
-                // Forms\Components\Select::make('access_level')
-                //     ->label('Role')
-                //     ->required()
-                //     ->options(function () {
-                //         return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
-                //     })
-                //     ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
+                        Forms\Components\Select::make('gender')
+                            ->required()
+                            ->options(GenderEnum::class),
 
-                Forms\Components\MultiSelect::make('user.roles')
-                    ->label('Roles')
-                    ->relationship('roles', 'name') // points to $staff->user->roles
-                    ->preload(),
+                        Forms\Components\Select::make('race')
+                            ->required()
+                            ->options(RaceEnum::class),
 
+                        Forms\Components\Select::make('religion')
+                            ->required()
+                            ->options(ReligionEnum::class),
+                    ]),
 
-                Forms\Components\TextInput::make('position'),
+                Forms\Components\Section::make('Employment & Role')
+                    ->description('Institute, roles, and employment details')
+                    ->columns(2)
+                    ->schema([
 
-                Forms\Components\Select::make('employment_status')
-                    ->required()
-                    ->options(StatusEnum::class),
+                        // Institute
+                        Forms\Components\Select::make('institute_id')
+                            ->relationship('institute', 'name')
+                            ->columnSpanFull()
+                            ->required()
+                            ->reactive(),
 
+                        // Roles
+                        Forms\Components\MultiSelect::make('user.roles')
+                            ->label('Roles')
+                            ->columnSpanFull()
+                            ->required()
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->reactive(),
 
+                        // Department
+                        Forms\Components\Select::make('department_id')
+                            ->label('Department')
+                            ->reactive()
+                            ->options(function (callable $get) {
+                                $instituteId = $get('institute_id');
+                                $options = ['' => 'N/A']; // manual N/A
+                                if ($instituteId) {
+                                    $departments = \App\Models\Department::where('institute_id', $instituteId)
+                                        ->pluck('name', 'id')
+                                        ->toArray();
+                                    $options = $options + $departments;
+                                }
+                                return $options;
+                            })
+                            ->default('') // default N/A
+                            ->disabled(function (callable $get) {
+                                $roleIds = $get('user.roles') ?? [];
+                                $roles = \Spatie\Permission\Models\Role::whereIn('id', $roleIds)->pluck('name')->toArray();
+                                return in_array('academic_officer', $roles); // disabled if AO
+                            }),
+
+                        // Faculty
+                        Forms\Components\Select::make('faculty_id')
+                            ->label('Faculty')
+                            ->reactive()
+                            ->options(function (callable $get) {
+                                $instituteId = $get('institute_id');
+                                $options = ['' => 'N/A']; // manual N/A
+                                if ($instituteId) {
+                                    $faculties = \App\Models\Faculty::where('institute_code', $instituteId)
+                                        ->pluck('name', 'id')
+                                        ->toArray();
+                                    $options = $options + $faculties;
+                                }
+                                return $options;
+                            }),
+
+                        Forms\Components\TextInput::make('position'),
+
+                        Forms\Components\Select::make('staff_type')
+                            ->required()
+                            ->options(StaffTypeEnum::class),
+
+                        Forms\Components\Select::make('employment_status')
+                            ->required()
+                            ->options(StatusEnum::class),
+
+                    ])
 
 
             ]);
-
     }
+
 
     
 

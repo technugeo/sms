@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 
 class AddressRelationManager extends RelationManager
 {
-    protected static string $relationship = 'addresses'; // must match method in Student model
+    protected static string $relationship = 'addresses';
 
     public function form(Form $form): Form
     {
@@ -21,7 +21,6 @@ class AddressRelationManager extends RelationManager
             Forms\Components\TextInput::make('address_1')->required(),
             Forms\Components\TextInput::make('address_2')->required(),
             Forms\Components\TextInput::make('postcode')->required(),
-
             Forms\Components\Select::make('country_id')
                 ->label('Country')
                 ->options(Country::pluck('name', 'id')->toArray())
@@ -31,10 +30,12 @@ class AddressRelationManager extends RelationManager
 
             Forms\Components\Select::make('state_id')
                 ->label('State')
-                ->options(fn (callable $get) => 
-                    $get('country_id') 
-                        ? State::where('country_id', $get('country_id'))->pluck('name', 'id')->toArray() 
-                        : [])
+                ->options(function (callable $get) {
+                    $countryId = $get('country_id');
+                    return $countryId
+                        ? State::where('country_id', $countryId)->pluck('name', 'id')->toArray()
+                        : [];
+                })
                 ->searchable()
                 ->preload()
                 ->reactive()
@@ -42,12 +43,15 @@ class AddressRelationManager extends RelationManager
 
             Forms\Components\Select::make('city_id')
                 ->label('City')
-                ->options(fn (callable $get) => 
-                    $get('state_id') 
-                        ? City::where('state_id', $get('state_id'))->pluck('name', 'id')->toArray() 
-                        : [])
+                ->options(function (callable $get) {
+                    $stateId = $get('state_id');
+                    return $stateId
+                        ? City::where('state_id', $stateId)->pluck('name', 'id')->toArray()
+                        : [];
+                })
                 ->searchable()
                 ->preload()
+                ->reactive()
                 ->disabled(fn (callable $get) => !$get('state_id')),
         ]);
     }
@@ -68,10 +72,23 @@ class AddressRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (array $data, RelationManager $livewire) {
                         $data['user_id'] = $livewire->getOwnerRecord()->user_id;
                         return $data;
-                    }),
+                    })
+                    ->after(function ($record, RelationManager $livewire) {
+                        $staff = $livewire->getOwnerRecord(); // This is a Staff model
+                        $staff->address_id = $record->id;     // Assign the new Address ID
+                        $staff->save();                       
+                    })
+
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->after(function ($record, RelationManager $livewire) {
+                    $staff = $livewire->getOwnerRecord();
+                    if ($staff->address_id !== $record->id) {
+                        $staff->address_id = $record->id;
+                        $staff->save();
+                    }
+                }),
                 Tables\Actions\DeleteAction::make(),
             ]);
     }

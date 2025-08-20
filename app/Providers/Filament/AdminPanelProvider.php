@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->brandName('Student Management System') 
+            ->brandName(view('partials.brand'))
             
             // -------- USER MENU ITEMS --------
             ->userMenuItems([

@@ -45,6 +45,7 @@ class Staff extends Model implements HasMedia
         'employment_status',
         'staff_type',
         'deleted_by',
+        'role',
     ];
 
     protected $casts = [

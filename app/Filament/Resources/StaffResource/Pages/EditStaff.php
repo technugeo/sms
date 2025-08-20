@@ -73,7 +73,7 @@ class EditStaff extends EditRecord
     {
         $user = $this->record->user;
 
-        $data['name'] = $user?->name ?? '';
+        $data['full_name'] = $user?->name ?? '';
         $data['email'] = $user?->email ?? '';
 
         return $data;
@@ -100,7 +100,7 @@ class EditStaff extends EditRecord
         // 2️⃣ Update related user AFTER capturing original data
         if ($user) {
             $user->update([
-                'name'  => $data['name'],
+                'name'  => $data['full_name'],
                 'email' => $data['email'],
             ]);
 
@@ -110,7 +110,7 @@ class EditStaff extends EditRecord
         }
 
         // 3️⃣ Remove user fields before saving staff
-        unset($data['name'], $data['email'], $data['access_level']);
+        unset($data['full_name'], $data['email'], $data['access_level']);
 
         // 4️⃣ Track updater
         $data['updated_by'] = auth()->user()->email ?? 'system';

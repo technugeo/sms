@@ -38,10 +38,10 @@ class CourseResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\Select::make('faculty_id')
-                    ->relationship('department', 'name')
-                    ->required()
-                    ->reactive(),
+                // Forms\Components\Select::make('faculty_id')
+                //     ->relationship('faculty', 'name') // use the existing relation in Course model
+                //     ->label('Faculty')
+                //     ->required(),
 
                 Forms\Components\Select::make('programme_type')
                     ->label('Programme Type')
@@ -64,9 +64,9 @@ class CourseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('department.name')
-                    ->label('Department/Faculty')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('faculty.name')
+                    ->label('Faculty'),
+
                 Tables\Columns\TextColumn::make('prog_code')
                     ->label('Programme Code')
                     ->searchable(),
@@ -135,14 +135,10 @@ class CourseResource extends Resource
             ]);
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
     
     public static function getNavigationGroup(): ?string
     {
-        return 'Management';
+        return 'Data Configuration';
     }
     public static function getNavigationSort(): ?int
     {

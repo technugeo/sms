@@ -20,18 +20,28 @@ class EditCourse extends EditRecord
     }
     public function getBreadcrumbs(): array
     {
-        $course = $this->record;
-        $department = $course->department;
-        $institute = $department->institute;
+        $course = $this->record; 
+        $faculty = $course->faculty;
+        $institute = $faculty?->institute;
 
-        return [
+        $breadcrumbs = [
             route('filament.admin.resources.institutes.index') => 'Institutes',
-            route('filament.admin.resources.institutes.edit', $institute) => $institute->name,
-            route('filament.admin.resources.departments.view', $department) => $department->name,
-            route('filament.admin.resources.courses.view', $course) => $course->prog_name ?? 'View Course',
-            url()->current() => 'Edit',
         ];
+
+        if ($institute) {
+            $breadcrumbs[route('filament.admin.resources.institutes.view', $institute)] = $institute->name;
+        }
+
+        if ($faculty) {
+            $breadcrumbs[route('filament.admin.resources.faculties.view', $faculty)] = $faculty->name;
+        }
+
+        $breadcrumbs[route('filament.admin.resources.courses.view', $course)] = $course->prog_name ?? 'View Course';
+        $breadcrumbs[url()->current()] = 'Edit';
+
+        return $breadcrumbs;
     }
+
 
 
 }

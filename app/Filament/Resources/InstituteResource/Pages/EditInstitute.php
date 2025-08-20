@@ -24,10 +24,11 @@ class EditInstitute extends EditRecord
 
         return [
             route('filament.admin.resources.institutes.index') => 'Institutes',
-            route('filament.admin.resources.institutes.edit', $institute) => $institute->name,
+            route('filament.admin.resources.institutes.view', $institute) => $institute->name,
             url()->current() => 'Edit',
         ];
     }
+
 
 
 

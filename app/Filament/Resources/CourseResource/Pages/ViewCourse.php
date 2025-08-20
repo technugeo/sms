@@ -19,26 +19,26 @@ class ViewCourse extends ViewRecord
     public function getBreadcrumbs(): array
     {
         $course = $this->record; 
-        $department = $course->department;
-        $institute = $department?->institute;
+        $faculty = $course->faculty;
+        $institute = $faculty?->institute;
 
-        return [
+        $breadcrumbs = [
             route('filament.admin.resources.institutes.index') => 'Institutes',
-
-            // Institute
-            $institute
-                ? route('filament.admin.resources.institutes.view', $institute)
-                : '#' => $institute?->name ?? 'Unknown Institute',
-
-            // Department
-            $department
-                ? route('filament.admin.resources.departments.view', $department)
-                : '#' => $department?->name ?? 'Unknown Department',
-
-            // Course (prog_name from lib_course_prog)
-            url()->current() => $course->prog_name ?? 'View Course',
         ];
+
+        if ($institute) {
+            $breadcrumbs[route('filament.admin.resources.institutes.view', $institute)] = $institute->name;
+        }
+
+        if ($faculty) {
+            $breadcrumbs[route('filament.admin.resources.faculties.view', $faculty)] = $faculty->name;
+        }
+
+        $breadcrumbs[url()->current()] = $course->prog_name ?? 'View Course';
+
+        return $breadcrumbs;
     }
+
 
 
 

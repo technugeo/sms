@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Department extends Model
+class Faculty extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'institute_id',
+        'institute_code',
         'name',
         'code',
         'description',
@@ -21,14 +21,11 @@ class Department extends Model
 
     public function institute()
     {
-        return $this->belongsTo(Institute::class, 'institute_id', 'mqa_institute_id');
+        return $this->belongsTo(Institute::class, 'institute_code', 'mqa_institute_id');
     }
-
-
-
-
-    public function designations(): HasMany
+    public function courses()
     {
-        return $this->hasMany(Designation::class);
+        return $this->hasMany(Course::class, 'faculty_id');
     }
+
 }
