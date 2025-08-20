@@ -19,35 +19,58 @@ use App\Enum\ReligionEnum;
 use App\Enum\StaffTypeEnum;
 use App\Enum\StatusEnum;
 
+use Filament\Navigation\NavigationItem;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\MultiSelect;
+
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StaffResource extends Resource
 {
-    
-    public static function canAccess(): bool
-    {
-        return auth()->check() && auth()->user()->hasAnyRole(['SA', 'AA']);
-    }
-
-    
-    public static function navigation(): ?NavigationItem
-    {
-        return parent::navigation()?->visible(fn (): bool => auth()->user()->hasAnyRole(['SA','AA']));
-    }
-
-
-
 
 
     protected static ?string $model = Staff::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationItems(): array
+    {
+        $user = auth()->user();
+        $items = [];
+
+        // Admin/staff menu
+        if ($user->can('view_any_staff')) {
+            $items[] = NavigationItem::make('Staff')
+                ->icon(static::$navigationIcon)
+                ->group(static::getNavigationGroup())
+                ->sort(static::getNavigationSort())
+                ->url(static::getUrl('index'));
+        }
+
+        // Staff "My Profile" menu (everyone with a staff record sees this)
+        $staff = Staff::where('email', $user->email)->first();
+
+        if ($staff) {
+            $items[] = NavigationItem::make('Profile')
+                ->icon('heroicon-o-user-circle')
+                ->url(StaffResource::getUrl('view', ['record' => $staff->getKey()]))
+                ->group(static::getNavigationGroup())
+                ->sort(1);
+        }
+
+        return $items;
+    }
+
+
+
 
     public static function form(Form $form): Form
     {
@@ -132,15 +155,18 @@ class StaffResource extends Resource
                     ->required()
                     ->options(StaffTypeEnum::class),
 
-                Forms\Components\Select::make('access_level')
-                    ->label('Role')
-                    ->required()
-                    ->options(function () {
-                        return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
-                    })
-                    ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
+                // Forms\Components\Select::make('access_level')
+                //     ->label('Role')
+                //     ->required()
+                //     ->options(function () {
+                //         return \Spatie\Permission\Models\Role::pluck('name', 'name')->toArray();
+                //     })
+                //     ->default(fn ($record) => $record?->user?->roles->pluck('name')->first() ?? null),
 
-
+                Forms\Components\MultiSelect::make('user.roles')
+                    ->label('Roles')
+                    ->relationship('roles', 'name') // points to $staff->user->roles
+                    ->preload(),
 
 
                 Forms\Components\TextInput::make('position'),
@@ -202,9 +228,10 @@ class StaffResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -212,6 +239,18 @@ class StaffResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getTableQuery(): Builder
+    {
+        $query = parent::getTableQuery();
+
+        // Include trashed if user wants to see them
+        if (request()->has('trashed')) {
+            $query = $query->withTrashed(); // shows soft-deleted records
+        }
+
+        return $query;
     }
 
     public static function getRelations(): array
@@ -228,8 +267,19 @@ class StaffResource extends Resource
             'create' => Pages\CreateStaff::route('/create'),
             'edit' => Pages\EditStaff::route('/{record}/edit'),
             'import' => Pages\ImportStaffs::route('/import'),
+            'view' => Pages\ViewStaff::route('/{record}'),
+            'profile' => \App\Filament\Pages\StaffProfile::route('/{record}/profile'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes() // removes SoftDeletes global scope
+            ->withTrashed();       // includes soft-deleted records
+    }
+
+
     public static function getNavigationGroup(): ?string
     {
         return 'User Management';

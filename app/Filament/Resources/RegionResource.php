@@ -16,16 +16,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class RegionResource extends Resource
 {
     
-    public static function canAccess(): bool
-    {
-        return auth()->check() && auth()->user()->hasAnyRole(['SA']);
-    }
-
-    
-    public static function navigation(): ?NavigationItem
-    {
-        return parent::navigation()?->visible(fn (): bool => auth()->user()->hasAnyRole(['SA']));
-    }
     
     protected static ?string $model = Region::class;
 

@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Department;
+use App\Models\Nationality;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class DepartmentPolicy
+class NationalityPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class DepartmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_department');
+        return $user->can('view_any_nationality');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Department $department): bool
+    public function view(User $user, Nationality $nationality): bool
     {
-        return $user->can('view_department');
+        return $user->can('view_nationality');
     }
 
     /**
@@ -31,23 +31,23 @@ class DepartmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_department');
+        return $user->can('create_nationality');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Department $department): bool
+    public function update(User $user, Nationality $nationality): bool
     {
-        return $user->can('update_department');
+        return $user->can('update_nationality');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Department $department): bool
+    public function delete(User $user, Nationality $nationality): bool
     {
-        return $user->can('delete_department');
+        return $user->can('delete_nationality');
     }
 
     /**
@@ -55,15 +55,15 @@ class DepartmentPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_department');
+        return $user->can('delete_any_nationality');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Department $department): bool
+    public function forceDelete(User $user, Nationality $nationality): bool
     {
-        return $user->can('force_delete_department');
+        return $user->can('force_delete_nationality');
     }
 
     /**
@@ -71,15 +71,15 @@ class DepartmentPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_department');
+        return $user->can('force_delete_any_nationality');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Department $department): bool
+    public function restore(User $user, Nationality $nationality): bool
     {
-        return $user->can('restore_department');
+        return $user->can('restore_nationality');
     }
 
     /**
@@ -87,15 +87,15 @@ class DepartmentPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_department');
+        return $user->can('restore_any_nationality');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Department $department): bool
+    public function replicate(User $user, Nationality $nationality): bool
     {
-        return $user->can('replicate_department');
+        return $user->can('replicate_nationality');
     }
 
     /**
@@ -103,6 +103,6 @@ class DepartmentPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_department');
+        return $user->can('reorder_nationality');
     }
 }

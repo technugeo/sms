@@ -6,8 +6,10 @@ use Filament\Pages\Auth\Login as BaseLogin;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Validation\ValidationException;
 use Filament\Forms;
+use Spatie\Permission\Models\Role;
 
 class Login extends BaseLogin
 {
@@ -43,24 +45,28 @@ class Login extends BaseLogin
 
         parent::mount();
 
+        // Show password update notification only once
         if (request()->hasCookie('post_password_update_notice')) {
             \Filament\Notifications\Notification::make()
                 ->title('Password updated successfully')
                 ->body('Please login again with your new password.')
                 ->success()
                 ->send();
+
+            // Delete the cookie so it doesn't trigger again
+            Cookie::queue(Cookie::forget('post_password_update_notice'));
         }
-
     }
-
 
     public function authenticate(): ?LoginResponse
     {
+        // Validate input
         $credentials = $this->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
 
+        // Attempt login
         if (!Auth::attempt([
             'email' => $this->email,
             'password' => $this->password,
@@ -71,16 +77,18 @@ class Login extends BaseLogin
         }
 
         $user = Auth::user();
-        $allowedRoles = ['SA', 'AA', 'NAO', 'AO', 'S'];
 
-        if (!in_array($user->role, $allowedRoles)) {
+        // ✅ Fetch allowed roles dynamically
+        $allowedRoles = Role::pluck('name')->toArray();
+
+        if (! $user->hasAnyRole($allowedRoles)) {
             Auth::logout();
             throw ValidationException::withMessages([
                 'email' => 'Unauthorized role',
             ]);
         }
 
-        
+        // Check user status
         if (in_array($user->status, ['Suspended', 'Deleted'])) {
             Auth::logout();
             throw ValidationException::withMessages([
@@ -90,29 +98,36 @@ class Login extends BaseLogin
             ]);
         }
 
-
-        
+        // Auto-activate pending users
         if (is_null($user->email_verified_at) && $user->is_active == 0 && $user->status === 'Pending Activation') {
             $user->email_verified_at = now();
             $user->is_active = 1;
             $user->status = 'Activated';
             $user->save();
-
             $user->refresh();
         }
 
-
-
+        // Logging
         \Log::info('Login attempt', [
             'email' => $this->email,
             'has_token' => $this->token !== null,
             'token_value' => $this->token,
-            'user_email_verified_at' => $user->email_verified_at, 
+            'user_email_verified_at' => $user->email_verified_at,
             'user_is_active' => $user->is_active,
             'user_status' => $user->status,
         ]);
 
+        DB::table('audit_log')->insert([
+            'action_by' => $user->email,
+            'action_type' => 'login',
+            'module' => 'auth',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time' => now(),
+            'notes' => 'User logged in successfully',
+        ]);
 
+        // Handle token logic
         if ($this->token) {
             $hasActiveToken = DB::table('password_reset_tokens')
                 ->where('email', $user->email)
@@ -136,10 +151,8 @@ class Login extends BaseLogin
 
                 return null;
             }
-
         }
 
         return app(LoginResponse::class);
     }
-
 }

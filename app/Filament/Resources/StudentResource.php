@@ -25,10 +25,12 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Navigation\NavigationItem;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Mail;
 
 class StudentResource extends Resource
 {
@@ -37,35 +39,15 @@ class StudentResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     /**
-     * Controls access to the resource itself
-     */
-    public static function canAccess(): bool
-    {
-        return auth()->check() && auth()->user()->hasAnyRole(['SA', 'AA','AO', 'NAO', 'S']);
-    }
-
-    /**
      * Controls sidebar menu visibility
      */
     public static function getNavigationItems(): array
     {
         $user = auth()->user();
-
         $items = [];
 
-        if ($user->hasRole('S')) {
-            // Student sees "My Profile"
-            $student = Student::where('email', $user->email)->first();
-
-            if ($student) {
-                $items[] = NavigationItem::make('My Profile')
-                    ->icon('heroicon-o-user-circle')
-                    ->url(StudentResource::getUrl('view', ['record' => $student->getKey()]))
-                    ->group('User Management')
-                    ->sort(1);
-            }
-        } else {
-            // Admins see regular Student menu
+        // Admin/staff menu
+        if ($user->can('view_any_student')) {
             $items[] = NavigationItem::make('Students')
                 ->icon(static::$navigationIcon)
                 ->group(static::getNavigationGroup())
@@ -73,9 +55,21 @@ class StudentResource extends Resource
                 ->url(static::getUrl('index'));
         }
 
+        // Student menu
+        if ($user->can('view_on_student_profile')) {
+            $student = Student::where('email', $user->email)->first();
+
+            if ($student) {
+                $items[] = NavigationItem::make('My Profile')
+                    ->icon('heroicon-o-user-circle')
+                    ->url(StudentResource::getUrl('view', ['record' => $student->getKey()]))
+                    ->group(static::getNavigationGroup())
+                    ->sort(1);
+            }
+        }
+
         return $items;
     }
-
 
 
 
@@ -90,32 +84,6 @@ class StudentResource extends Resource
         return 0;
     }
 
-    /**
-     * Per-record view permission
-     */
-    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        $user = auth()->user();
-
-        if ($user->hasAnyRole(['SA', 'AA', 'AO', 'NAO'])) {
-            return true;
-        }
-
-        if ($user->hasRole('S')) {
-            \Log::info('canView check', [
-                'student_id' => $record->id,
-                'student_user_id' => $record->user_id ?? null,
-                'student_email' => $record->email,
-                'auth_user_id' => $user->id,
-                'auth_user_email' => $user->email,
-            ]);
-
-            return $record->user_id === $user->id
-                || strtolower($record->email) === strtolower($user->email);
-        }
-
-        return false;
-    }
 
     public static function form(Form $form): Form
     {
@@ -203,7 +171,9 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('matric_id')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('full_name'),
                 Tables\Columns\TextColumn::make('nric')->searchable(),
-                Tables\Columns\TextColumn::make('email')->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->disabled(fn() => Filament::auth()->user()?->hasRole('student')),
                 Tables\Columns\TextColumn::make('phone_number')->searchable(),
                 Tables\Columns\TextColumn::make('passport_no')->searchable(),
                 Tables\Columns\TextColumn::make('citizen'),
@@ -216,7 +186,9 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                TrashedFilter::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
 
@@ -245,8 +217,51 @@ class StudentResource extends Resource
     {
         $record->update(['academic_status' => $status]);
 
-        if (strtolower($status) === 'suspended' && $record->user) {
+        if ($status === AcademicEnum::SUSPENDED->value && $record->user) {
             $record->user->update(['status' => 'Suspended']);
+        }
+
+        if ($status === AcademicEnum::REGISTERED->value && $record->user) {
+            $user = $record->user;
+            $link = url('/login');
+            $tempPassword = \DB::table('password_reset_tokens')
+                ->where('user_id', $user->id)
+                ->where('is_active', 'yes')
+                ->latest('created_at')
+                ->value('password') ?? 'YourTempPassword123';
+
+            try {
+                Mail::html("
+                    <p>Hello <strong>{$user->name}</strong>,</p>
+
+                    <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
+                    Your student account has been successfully created.</p>
+
+                    <p><strong>Please find your login details below:</strong><br>
+                    <strong>Student Name:</strong> {$user->name}<br>
+                    <strong>User ID (Email):</strong> {$user->email}<br>
+                    <strong>Temporary Password:</strong> {$tempPassword}<br>
+                    
+                    <p style=\"text-align: center;\">
+                        <a href=\"{$link}\" 
+                        style=\"display: inline-block; padding: 10px 20px; font-size: 16px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;\">
+                        Click here to Login
+                        </a>
+                    </p>
+
+                    <p><strong>Important:</strong><br>
+                    You will be required to update your password immediately after your first login.<br>
+                    Do not share your login credentials with anyone.</p>
+
+                    <p>Thank you,<br>
+                    NuSmart Support Team</p>
+                    ", function ($message) use ($user) {
+                        $message->to($user->email)
+                                ->subject('Student - Account Credentials');
+                    });
+            } catch (\Exception $e) {
+                \Log::error("Failed to send registration email to {$user->email}: " . $e->getMessage());
+            }
         }
 
         Notification::make()
@@ -254,6 +269,19 @@ class StudentResource extends Resource
             ->success()
             ->body("{$record->full_name}'s academic status was changed successfully.")
             ->send();
+    }
+
+    
+    public static function getTableQuery(): Builder
+    {
+        $query = parent::getTableQuery();
+
+        // Include trashed if user wants to see them
+        if (request()->has('trashed')) {
+            $query = $query->withTrashed(); // shows soft-deleted records
+        }
+
+        return $query;
     }
 
     public static function getRelations(): array
@@ -283,6 +311,7 @@ class StudentResource extends Resource
     {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->with('course');  // eager load course relation
+            ->with('course')
+            ->withTrashed();
     }
 }

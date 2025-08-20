@@ -9,10 +9,10 @@ class RolesSeeder extends Seeder
 {
     public function run()
     {
-        Role::firstOrCreate(['name' => 'SA']);  // System Admin
-        Role::firstOrCreate(['name' => 'AA']);  // Account Admin
-        Role::firstOrCreate(['name' => 'NAO']); // Non Academic Officer
-        Role::firstOrCreate(['name' => 'AO']);  // Academic Officer
-        Role::firstOrCreate(['name' => 'S']);   // Student
+        Role::firstOrCreate(['name' => 'system_admin']);  // System Admin
+        Role::firstOrCreate(['name' => 'account_admin']);  // Account Admin
+        Role::firstOrCreate(['name' => 'non_academic_officer']); // Non Academic Officer
+        Role::firstOrCreate(['name' => 'academic_officer']);  // Academic Officer
+        Role::firstOrCreate(['name' => 'student']);   // Student
     }
 }

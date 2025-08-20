@@ -23,6 +23,7 @@ class InstituteSeeder extends Seeder
             'departments',
             'lib_course_prog',
             'lib_sem_subjects',
+            'role_has_permissions',
         ];
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
@@ -39,6 +40,7 @@ class InstituteSeeder extends Seeder
             'departments.sql',
             'lib_course_prog.sql',
             'lib_sem_subjects.sql',
+            'role_has_permissions.sql',
         ];
 
         foreach ($sqlFiles as $file) {

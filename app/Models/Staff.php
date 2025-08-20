@@ -12,6 +12,7 @@ use App\Enum\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -41,7 +42,7 @@ class Staff extends Model implements HasMedia
         'religion',
         'institute_id',
         'access_level',
-        'emplloyment_status',
+        'employment_status',
         'staff_type',
         'deleted_by',
     ];
@@ -51,7 +52,7 @@ class Staff extends Model implements HasMedia
         'citizen' => CitizenEnum::class,
         'marriage_status' => MarriageEnum::class,
         'gender' => GenderEnum::class,
-        'employment_stats' => StatusEnum::class,
+        'employment_status' => StatusEnum::class,
         'staff_type' => StaffTypeEnum::class,
     ];
 
@@ -119,10 +120,12 @@ class Staff extends Model implements HasMedia
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
-    public function role(): BelongsTo
+    public function roles(): BelongsToMany
     {
-        return $this->belongsTo(Role::class);
+        return $this->user()->first()?->roles() ?? $this->belongsToMany(\Spatie\Permission\Models\Role::class); 
     }
+
+
 
 
     /**
