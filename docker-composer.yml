@@ -25,8 +25,7 @@ services:
       - "traefik.http.routers.fim.rule=Host(`fim-dev.nusmart.my`)"
       - "traefik.http.routers.fim.entrypoints=websecure"
       - "traefik.http.routers.fim.tls.certresolver=le"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.fim.middlewares=redirect-to-https"
+      - "traefik.http.services.fim.loadbalancer.server.port=80"
 
 networks:
   nusmart-net:
