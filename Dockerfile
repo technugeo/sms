@@ -17,4 +17,4 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Optional: copy custom www.conf if needed
-# COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf
