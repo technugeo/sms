@@ -117,13 +117,44 @@ class SuperAdminSeeder extends Seeder
             'delete_any_student::guardian',
             'view_on_staff_profile',
         ];
+        $accountAdminPermissions = [
+            'view_staff',
+            'view_any_staff',
+            'create_staff',
+            'update_staff',
+            'reorder_staff',
+            'delete_staff',
+            'delete_any_staff',
+            'view_student',
+            'view_any_student',
+            'create_student',
+            'update_student',
+            'reorder_student',
+            'delete_student',
+            'delete_any_student',
+            'view_student::emergency::contact',
+            'view_any_student::emergency::contact',
+            'create_student::emergency::contact',
+            'update_student::emergency::contact',
+            'reorder_student::emergency::contact',
+            'delete_student::emergency::contact',
+            'delete_any_student::emergency::contact',
+            'view_student::guardian',
+            'view_any_student::guardian',
+            'create_student::guardian',
+            'update_student::guardian',
+            'reorder_student::guardian',
+            'delete_student::guardian',
+            'delete_any_student::guardian',
+            'view_on_staff_profile',
+        ];
 
         // Define roles and their permissions
         $roles = [
             'student' => $studentPermissions, // Exact permissions from SQL
             'academic_officer' => $aoPermissions,
             'non_academic_officer' => $nonAcademicOfficerPermissions,
-            'account_admin'  => $nonAcademicOfficerPermissions,
+            'account_admin'  => $accountAdminPermissions,
             'system_admin' => $allPermissions,
             'super_admin' => $allPermissions,
         ];

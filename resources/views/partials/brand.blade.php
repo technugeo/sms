@@ -1,6 +1,4 @@
-<div class="flex flex-col leading-tight" style="margin-bottom:40px;">
-    <span class="font-bold" style="text-align:center;font-size:26px;">NuSmart</span>
-    <br>
-    <span class="font-bold">Student Management System</span> 
-    <!-- font small -->
+<div class="flex flex-col leading-tight mb-10 text-center">
+    <span class="font-bold text-2xl">NuSmart</span>
+    <span class="font-semibold text-sm">Student Management System</span>
 </div>

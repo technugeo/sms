@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::table('lib_course_prog', function (Blueprint $table) {
             // Change created_by, updated_by, deleted_by from integer to varchar(200)
+            $table->string('faculty_id', 50)->change();
+
             $table->string('created_by', 200)->nullable()->change();
             $table->string('updated_by', 200)->nullable()->change();
             $table->string('deleted_by', 200)->nullable()->change(); // in case deleted_by can be null
@@ -25,6 +27,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('lib_course_prog', function (Blueprint $table) {
+            
+            $table->integer('faculty_id')->change();
             // Revert changes if needed
             $table->integer('created_by')->change();
             $table->integer('updated_by')->change();

@@ -15,7 +15,7 @@ return new class extends Migration
             // Drop old enum column
             $table->dropColumn('access_level');
 
-            // Add new role_id column referencing spatie/roles table
+            // Add new role column (string, since that's what you had in up)
             $table->string('role')
                 ->after('nationality_type');
 
@@ -27,12 +27,15 @@ return new class extends Migration
                 ->default('full-time')
                 ->after('employment_status');
 
-            $table->softDeletes()->after('staff_type');
+                
+            $table->softDeletes();
 
             $table->unsignedBigInteger('user_id')->nullable()->change();
-            $table->integer('department_id')->nullable()->change();
             
-            $table->unsignedBigInteger('faculty_id')->nullable()
+            $table->string('department_id')->nullable()
+                ->after('institute_id')->change();
+                
+            $table->string('faculty_id')->nullable()
                 ->after('department_id');
 
             $table->string('created_by', 200)->nullable()->change();
@@ -47,15 +50,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('staff', function (Blueprint $table) {
-            // Drop new FK column
-            $table->dropForeign(['role_id']);
-            $table->dropColumn('role_id');
+            // Drop new role column
+            $table->dropColumn('role');
 
             // Restore old enum (using your RoleEnum)
             $table->enum('access_level', array_column(\App\Enum\RoleEnum::cases(), 'value'))
                 ->after('nationality_type');
 
-            $table->integer('department_id')->nullable()->change();
+            $table->string('department_id')->change();
             $table->integer('created_by')->change();
             $table->integer('updated_by')->change();
             $table->integer('deleted_by')->nullable()->change();

@@ -33,62 +33,89 @@ class CreateStaff extends CreateRecord
 
     protected function handleRecordCreation(array $data): Staff
     {
+        // Step 0: Generate temporary password
         $tempPassword = $this->generateTempPassword();
         $hashedTempPassword = Hash::make($tempPassword);
 
-        // Step 1: Determine primary role from form
-        $roles = $data['user']['roles'] ?? [];
-        $primaryRole = $roles[0] ?? 'non_academic_officer'; // fallback if empty
+        // Extract role IDs safely
+        $roleIds = collect($data['user']['roles'] ?? [])
+            ->map(fn($r) => is_array($r) ? $r['id'] : $r)
+            ->filter()
+            ->values()
+            ->toArray();
+
+        // Get role names from IDs
+        $roles = Role::whereIn('id', $roleIds)->pluck('name')->toArray();
+
+        // Primary role
+        $primaryRole = $roles[0] ?? 'non_academic_officer';
+
 
         // Step 2: Create User
         $user = User::create([
-            'name'         => $data['name'],
+            'name'         => $data['full_name'],
             'email'        => $data['email'],
             'password'     => $hashedTempPassword,
             'profile_type' => 'App\\Models\\Staff',
             'status'       => 'Pending Activation',
-            'role'         => $primaryRole, // string role, required
+            'role'         => $primaryRole,
         ]);
 
-        // Step 3: Sync roles in model_has_roles
+        // Step 3: Sync roles
         $user->syncRoles($roles);
 
-        // Step 4: Handle department/faculty
+        // Step 4: Handle department/faculty logic
         $data['department_id'] = ($data['department_id'] ?? '') === 'N/A' ? null : $data['department_id'];
-        $data['faculty_id']    = ($data['faculty_id'] ?? '') === 'N/A' ? null : $data['faculty_id'];
+        $data['faculty_id'] = ($data['faculty_id'] ?? '') === 'N/A' ? null : $data['faculty_id'];
 
-        // Force department null for academic_officer
         if ($primaryRole === 'academic_officer') {
             $data['department_id'] = null;
         }
 
-        // Step 5: Prepare remaining staff data
-        $data['user_id']   = $user->id;
-        $data['full_name'] = $data['name'];
-        $data['email']     = $user->email;
-        $data['nationality'] = $data['nationality'] ?? 'Malaysia';
-        $data['role'] = $primaryRole; // save string role in staff table
+        // Step 5: Prepare Staff data
+        $staffData = $data;
+        $staffData['user_id'] = $user->id;
+        $staffData['email'] = $user->email;
+        $staffData['role'] = $primaryRole;
+        $staffData['nationality'] = $data['nationality'] ?? 'Malaysia';
 
-        unset($data['name'], $data['user']); // remove 'user' to prevent mass assignment error
+        // Assign institute_id
+        if (auth()->user()->hasRole('super_admin')) {
+            // Use selected mqa_institute_id directly
+            $staffData['institute_id'] = $data['institute_id'];
+        } else {
+            // Auto inherit from logged-in staff
+            $staffData['institute_id'] = optional(auth()->user()->staff)->institute_id;
 
+            if (!$staffData['institute_id']) {
+                throw new \Exception('Your account does not have an institute assigned. Please contact super admin.');
+            }
+        }
+
+
+
+
+        unset($staffData['user']); // remove nested user data to avoid mass assignment issues
+
+        
         // Step 6: Create Staff
-        $staff = Staff::create($data);
+        $staff = Staff::create($staffData);
 
-        // Step 7: Update User with profile_id
+        // Step 7: Update user profile_id
         $user->profile_id = $staff->id;
         $user->save();
 
         // Step 8: Insert password reset token
         $token = Str::uuid();
         \DB::table('password_reset_tokens')->insert([
-            'user_id'            => $user->id,
-            'email'              => $user->email,
-            'token'              => $token,
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'token' => $token,
             'temp_hash_password' => $hashedTempPassword,
-            'password'           => $tempPassword,
-            'is_active'          => 'yes',
-            'created_at'         => now(),
-            'updated_at'         => now(),
+            'password' => $tempPassword,
+            'is_active' => 'yes',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $link = url('/login?token=' . $token);
@@ -100,10 +127,21 @@ class CreateStaff extends CreateRecord
         <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
         Your staff account has been successfully created.</p>
 
-        <p><strong>Please find your login details below:</strong><br>
-        <strong>Staff Name:</strong> {$user->name}<br>
-        <strong>User ID (Email):</strong> {$user->email}<br>
-        <strong>Temporary Password:</strong> {$tempPassword}<br>
+        <p><strong>Please find your login details below:</strong></p>
+        <table style='border-collapse: collapse;'>
+            <tr>
+                <td style='padding: 5px;'><strong>Student Name:</strong></td>
+                <td style='padding: 5px;'>{$user->name}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>User ID (Email):</strong></td>
+                <td style='padding: 5px;'>{$user->email}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>Temporary Password:</strong></td>
+                <td style='padding: 5px;'>{$tempPassword}</td>
+            </tr>
+        </table>
         
         <p style=\"text-align: center;\">
             <a href=\"{$link}\" 
@@ -133,18 +171,19 @@ class CreateStaff extends CreateRecord
 
         // Step 10: Audit log
         \DB::table('audit_log')->insert([
-            'action_by'   => auth()->user()->email ?? 'system',
+            'action_by' => auth()->user()->email ?? 'system',
             'action_type' => 'create',
-            'module'      => 'staff',
-            'record_id'   => $staff->id,
-            'notes'       => 'Staff ' . $staff->full_name . ' created.',
-            'ip_address'  => request()->ip(),
-            'user_agent'  => request()->userAgent(),
-            'date_time'   => now(),
+            'module' => 'staff',
+            'record_id' => $staff->id,
+            'notes' => 'Staff ' . $staff->full_name . ' created.',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'date_time' => now(),
         ]);
 
         return $staff;
     }
+
 
 
 

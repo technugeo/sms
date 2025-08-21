@@ -14,6 +14,11 @@ class ListInstitutes extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('import')
+                ->label('Upload Excel')
+                ->url(ImportInstitutes::getUrl())
+                ->color('success')
+                ->icon('heroicon-o-arrow-up-tray'),
         ];
     }
 }

@@ -26,12 +26,12 @@ CREATE TABLE `lib_course_prog` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `prog_code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `prog_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `faculty_id` int NOT NULL,
+  `faculty_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `programme_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sponsoring_body` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_by` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `updated_by` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_by` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deleted_by` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE `lib_course_prog` (
 
 LOCK TABLES `lib_course_prog` WRITE;
 /*!40000 ALTER TABLE `lib_course_prog` DISABLE KEYS */;
-INSERT INTO `lib_course_prog` VALUES (1,'22','Diploma in Culinary Art (DCA)',1,'Diploma',NULL,'Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-14 23:17:42','2025-08-14 23:17:42',NULL),(2,'14','Diploma in Tourism Management (DTM)',2,'Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-14 23:18:12','2025-08-14 23:18:12',NULL),(3,'25','Diploma in Pastry & Bakery (DPB)',3,'Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-14 23:18:35','2025-08-14 23:18:35',NULL),(4,'12','Diploma in Foodservice Management (DFSM)',4,'Diploma',NULL,'Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-14 23:18:55','2025-08-14 23:18:55',NULL),(5,'13','Diploma in Hotel Management (DHM)',5,'Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-14 23:19:14','2025-08-14 23:19:14',NULL);
+INSERT INTO `lib_course_prog` VALUES (1,'22','Diploma in Culinary Art (DCA)','CA','Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-20 23:21:22','2025-08-20 23:21:22',NULL),(2,'14','Diploma in Tourism Management (DTM)','TR','Diploma',NULL,'Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-20 23:22:09','2025-08-20 23:22:09',NULL),(3,'13','Diploma in Hotel Management (DHM)','HT','Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-20 23:22:26','2025-08-20 23:22:26',NULL),(4,'25','Diploma in Pastry & Bakery (DPB)','PB','Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-20 23:22:46','2025-08-20 23:22:46',NULL),(5,'12','Diploma in Foodservice Management (DFSM)','FSM','Diploma','-','Active','superadmin@unipulse.com','superadmin@unipulse.com',NULL,'2025-08-20 23:23:06','2025-08-20 23:23:06',NULL);
 /*!40000 ALTER TABLE `lib_course_prog` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-15 15:19:45
+-- Dump completed on 2025-08-21 15:27:59

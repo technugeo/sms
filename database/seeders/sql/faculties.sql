@@ -16,42 +16,34 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `institutions`
+-- Table structure for table `faculties`
 --
 
-DROP TABLE IF EXISTS `institutions`;
+DROP TABLE IF EXISTS `faculties`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `institutions` (
+CREATE TABLE `faculties` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `mqa_institute_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `institute_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abbreviation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `district` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `dun` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `parliament` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_by` bigint unsigned NOT NULL DEFAULT '1',
-  `updated_by` bigint unsigned NOT NULL DEFAULT '1',
-  `deleted_by` bigint unsigned NOT NULL DEFAULT '1',
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('Active','Inactive','Deactivate') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `institutions`
+-- Dumping data for table `faculties`
 --
 
-LOCK TABLES `institutions` WRITE;
-/*!40000 ALTER TABLE `institutions` DISABLE KEYS */;
-INSERT INTO `institutions` VALUES (1,'FIM','FOOD INSTITUTE OF MALAYSIA','FIM','6','Malaysia','Selangor','Petaling Jaya','TAMAN MEDAN','PETALING JAYA SELATAN',NULL,1,1,1,'2025-08-13 19:02:29','2025-08-13 19:02:29',NULL);
-/*!40000 ALTER TABLE `institutions` ENABLE KEYS */;
+LOCK TABLES `faculties` WRITE;
+/*!40000 ALTER TABLE `faculties` DISABLE KEYS */;
+INSERT INTO `faculties` VALUES (1,'FIM','CA','CULINARY ART','-','Active','2025-08-20 23:20:06','2025-08-20 23:20:06',NULL),(2,'FIM','TR','TOURISM','-','Active','2025-08-20 23:20:17','2025-08-20 23:20:17',NULL),(3,'FIM','HT','HOTEL','-','Active','2025-08-20 23:20:26','2025-08-20 23:20:26',NULL),(4,'FIM','PB','PASTRY & BAKERY','-','Active','2025-08-20 23:20:34','2025-08-20 23:20:34',NULL),(5,'FIM','FSM','FOODSERVICE MANAGEMENT','-','Active','2025-08-20 23:20:45','2025-08-20 23:20:45',NULL);
+/*!40000 ALTER TABLE `faculties` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -63,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-15 10:58:18
+-- Dump completed on 2025-08-21 15:28:20

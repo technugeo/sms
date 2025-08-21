@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 
-
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -34,8 +33,14 @@ class StaffsImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
+            // Skip if full_name and nric are empty
             if (empty($row['full_name']) && empty($row['nric'])) {
                 continue; 
+            }
+
+            // Skip if email is empty
+            if (empty($row['email'])) {
+                continue;
             }
 
             $tempPassword = $this->generateTempPassword();
@@ -51,7 +56,7 @@ class StaffsImport implements ToCollection, WithHeadingRow
                 'role'         => $row['access_level'],
             ]);
 
-            // Step 2: Assign role using Spatie's assignRole method
+            // Step 2: Assign role using Spatie's assignRole method from access_level
             if (!empty($row['access_level'])) {
                 $user->assignRole($row['access_level']);
             }
@@ -77,11 +82,36 @@ class StaffsImport implements ToCollection, WithHeadingRow
             <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
             Your staff account has been successfully created.</p>
 
-            <p><strong>Please find your login details below:</strong><br>
-            <strong>Staff Name:</strong> {$user->name}<br>
-            <strong>User ID (Email):</strong> {$user->email}<br>
-            <strong>Temporary Password:</strong> {$tempPassword}<br>
-            <strong>Click here to log in:</strong> <a href=\"{$link}\">{$link}</a></p>
+            <p><strong>Please find your login details below:</strong></p>
+            <table style='border-collapse: collapse;'>
+                <tr>
+                    <td style='padding: 5px;'><strong>Student Name:</strong></td>
+                    <td style='padding: 5px;'>{$user->name}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 5px;'><strong>User ID (Email):</strong></td>
+                    <td style='padding: 5px;'>{$user->email}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 5px;'><strong>Temporary Password:</strong></td>
+                    <td style='padding: 5px;'>{$tempPassword}</td>
+                </tr>
+            </table>
+        
+            <p style=\"text-align: center;\">
+                <a href=\"{$link}\" 
+                style=\"
+                        display: inline-block;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        color: #ffffff;
+                        background-color: #007bff;
+                        text-decoration: none;
+                        border-radius: 5px;
+                \">
+                Click here to Login
+                </a>
+            </p>
 
             <p><strong>Important:</strong><br>
             You will be required to update your password immediately after your first login.<br>
@@ -95,26 +125,27 @@ class StaffsImport implements ToCollection, WithHeadingRow
             });
 
             // Step 4: Create Staff record
-            $role = Role::where('name', $row['access_level'])->first();
-
-            Staff::create([
-                'institute_id' => $row['mqa_institute_id'],
-                'department_id' => $row['department_id'],
-                'full_name' => $row['full_name'],
-                'nric' => $row['nric'],
-                'email' => $row['email'],
-                'phone_number' => $row['phone_number'],
-                'gender' => $row['gender'],
-                'marriage_status' => $row['marriage_status'],
-                'race' => $row['race'],
-                'religion' => $row['religion'],
-                'citizen' => $row['citizen'],
-                'nationality_type' => $row['nationality_type'],
-                'role_id' => $role ? $role->id : null,  
-                'position' => $row['position'],
-                'nationality' => $row['nationality'],
-                'staff_type' => $row['staff_type'],
-                'employment_status' => $row['employment_status'],
+            $staff = Staff::create([
+                'user_id'           => $user->id,
+                'institute_id'      => $row['mqa_institute_id'] ?? null,
+                // 'department_id'     => $row['department_id'] ?? null,
+                // 'faculty_id'        => $row['faculty_id'] ?? null,
+                'full_name'         => $row['full_name'],
+                'nric'              => $row['nric'],
+                'email'             => $row['email'] ?? $user->email,
+                'phone_number'      => $row['phone_number'] ?? null,
+                'passport_no'       => $row['passport_no'] ?? null,
+                'gender'            => $row['gender'] ?? null,
+                'marriage_status'   => $row['marriage_status'] ?? null,
+                'race'              => $row['race'] ?? null,
+                'religion'          => $row['religion'] ?? null,
+                'citizen'           => $row['citizen'] ?? null,
+                'nationality'       => $row['nationality'] ?? 'Malaysia', 
+                'nationality_type'  => $row['nationality_type'] ?? null,
+                'role'              => $row['access_level'] ?? null,
+                'position'          => $row['position'] ?? null,
+                'staff_type'        => $row['staff_type'] ?? null,
+                'employment_status' => $row['employment_status'] ?? null,
             ]);
 
             // Step 5: Update User's profile_id to link back to Staff

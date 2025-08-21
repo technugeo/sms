@@ -84,7 +84,7 @@ class CoursesRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['faculty_id'] = $this->ownerRecord->id; // ✅ correct
+                        $data['faculty_id'] = $this->ownerRecord->code; // ✅ correct
                         $data['created_by'] = auth()->user()->email;
                         $data['updated_by'] = auth()->user()->email;
 

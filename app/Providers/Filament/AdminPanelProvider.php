@@ -15,6 +15,7 @@ use Filament\Widgets;
 use Filament\Navigation\NavigationItem;
 use Filament\Navigation\UserMenuItem;
 use App\Filament\Resources\StudentResource;
+use App\Filament\Resources\StaffResource;
 
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -37,7 +38,10 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->brandName(view('partials.brand'))
+            ->brandName(view('partials.brand'))          // Login + tab
+            ->brandLogo(fn () => view('partials.brand-logo')) // Sidebar
+
+
             
             // -------- USER MENU ITEMS --------
             ->userMenuItems([
@@ -45,11 +49,19 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => auth()->user()->name)
                     ->icon('heroicon-o-user-circle')
                     ->url(function (): string {
-                        $student = \App\Models\Student::where('email', auth()->user()->email)->first();
+                        $user = auth()->user();
 
-                        return $student
-                            ? StudentResource::getUrl('view', ['record' => $student->getKey()])
-                            : '#';
+                        if ($user->hasRole('student')) {
+                            $student = \App\Models\Student::where('email', $user->email)->first();
+                            return $student 
+                                ? StudentResource::getUrl('view', ['record' => $student->getKey()])
+                                : '#';
+                        } else {
+                            $staff = \App\Models\Staff::where('email', $user->email)->first();
+                            return $staff
+                                ? StaffResource::getUrl('view', ['record' => $staff->getKey()])
+                                : '#';
+                        }
                     }),
 
                 'password' => UserMenuItem::make()

@@ -8,6 +8,9 @@ use App\Filament\Resources\StudentResource\RelationManagers;
 use App\Models\Student;
 use App\Models\Country;
 use App\Models\StudentGuardian;
+use App\Models\Institute;
+use App\Models\Faculty;
+use App\Models\Course;
 
 use App\Enum\CitizenEnum;
 use App\Enum\MarriageEnum;
@@ -31,6 +34,7 @@ use Filament\Navigation\NavigationItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class StudentResource extends Resource
 {
@@ -63,7 +67,7 @@ class StudentResource extends Resource
                 $items[] = NavigationItem::make('My Profile')
                     ->icon('heroicon-o-user-circle')
                     ->url(StudentResource::getUrl('view', ['record' => $student->getKey()]))
-                    ->group(static::getNavigationGroup())
+                    ->group('My Account') // <-- different group
                     ->sort(1);
             }
         }
@@ -87,26 +91,52 @@ class StudentResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $user = Auth::user();
+
         return $form
             ->schema([
-                Forms\Components\Select::make('current_course')
-                    ->label('Course')
-                    ->options(function () {
-                        return \App\Models\Course::all()->mapWithKeys(fn($course) => [
-                            $course->prog_code => "{$course->prog_code} - {$course->prog_name}"
-                        ])->toArray();
-                    })
+
+                Forms\Components\Select::make('institute_id')
+                    ->label('Institute')
+                    ->options(\App\Models\Institute::pluck('name', 'mqa_institute_id')->toArray())
                     ->required()
                     ->reactive()
-                    ->columnSpanFull(),
+                    ->afterStateUpdated(fn (callable $set) => $set('current_course', null)) // reset course when institute changes
+                    ->columnSpanFull()
+                    ->disabled(fn () => $user->role === 'student'),
+
+                Forms\Components\Select::make('current_course')
+                    ->label('Course')
+                    ->required()
+                    ->reactive()
+                    ->options(function (callable $get) {
+                        $instituteId = $get('institute_id');
+
+                        if (! $instituteId) {
+                            return [];
+                        }
+
+                        return \App\Models\Course::whereHas('faculty', function ($q) use ($instituteId) {
+                                $q->where('faculties.institute_code', $instituteId);
+                            })
+                            ->get()
+                            ->mapWithKeys(fn ($course) => [
+                                $course->prog_code => "{$course->prog_code} - {$course->prog_name}"
+                            ])
+                            ->toArray();
+                    })
+                    ->columnSpanFull()
+                    ->disabled(fn () => $user->role === 'student'),
 
                 Forms\Components\Select::make('intake_month')
                     ->required()
-                    ->options(IntakeEnum::class),
+                    ->options(IntakeEnum::class)
+                    ->disabled(fn () => $user->role === 'student'),
 
                 Forms\Components\TextInput::make('intake_year')
                     ->required()
-                    ->maxLength(4),
+                    ->maxLength(4)
+                    ->disabled(fn () => $user->role === 'student'),
 
                 Forms\Components\TextInput::make('full_name')->required(),
 
@@ -117,7 +147,8 @@ class StudentResource extends Resource
                     ->label('Email')
                     ->required()
                     ->afterStateHydrated(fn($component, $record, $state) => $record ? $component->state($record->email) : null)
-                    ->dehydrateStateUsing(fn($state) => $state),
+                    ->dehydrateStateUsing(fn($state) => $state)
+                    ->disabled(fn () => $user->role !== 'super_admin'),
 
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
@@ -159,7 +190,8 @@ class StudentResource extends Resource
 
                 Forms\Components\Select::make('academic_status')
                     ->required()
-                    ->options(AcademicEnum::class),
+                    ->options(AcademicEnum::class)
+                    ->disabled(fn () => $user->role === 'student'),
             ]);
     }
 

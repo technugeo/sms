@@ -20,8 +20,8 @@ class InstituteSeeder extends Seeder
         $tables = [
             'category_institute',
             'institutions',
-            // 'departments',
-            // 'lib_course_prog',
+            'faculties',
+            'lib_course_prog',
             'lib_sem_subjects',
             // 'role_has_permissions',
         ];
@@ -37,8 +37,8 @@ class InstituteSeeder extends Seeder
         $sqlFiles = [
             'category_institute.sql',
             'institutions.sql',
-            // 'departments.sql',
-            // 'lib_course_prog.sql',
+            'faculties.sql',
+            'lib_course_prog.sql',
             'lib_sem_subjects.sql',
             // 'role_has_permissions.sql',
         ];

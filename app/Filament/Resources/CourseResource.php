@@ -38,10 +38,12 @@ class CourseResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                // Forms\Components\Select::make('faculty_id')
-                //     ->relationship('faculty', 'name') // use the existing relation in Course model
-                //     ->label('Faculty')
-                //     ->required(),
+                Forms\Components\Select::make('faculty_id')
+                    ->label('Faculty')
+                    ->options(\App\Models\Faculty::pluck('name', 'code')->toArray()) // key = code
+                    ->required()
+                    ->searchable(),
+
 
                 Forms\Components\Select::make('programme_type')
                     ->label('Programme Type')

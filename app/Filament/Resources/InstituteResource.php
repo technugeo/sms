@@ -173,6 +173,7 @@ class InstituteResource extends Resource
         return [
             'index' => Pages\ListInstitutes::route('/'),
             'create' => Pages\CreateInstitute::route('/create'),
+            'import' => Pages\ImportInstitutes::route('/import'),
             'view' => Pages\ViewInstitute::route('/{record}'),
             'edit' => Pages\EditInstitute::route('/{record}/edit'),
         ];

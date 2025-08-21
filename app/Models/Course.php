@@ -35,8 +35,9 @@ class Course extends Model
     
     public function faculty()
     {
-        return $this->belongsTo(Faculty::class, 'faculty_id');
+        return $this->belongsTo(Faculty::class, 'faculty_id', 'code');
     }
+
 
 
     public function semesters()

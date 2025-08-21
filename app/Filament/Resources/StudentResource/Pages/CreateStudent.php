@@ -40,7 +40,7 @@ class CreateStudent extends CreateRecord
         return $password;
     }
 
-    protected function sendRegistrationEmail(User $user, string $tempPassword, string $token): void
+   protected function sendRegistrationEmail(User $user, string $tempPassword, string $token, string $matricId): void
     {
         $link = url('/login?token=' . $token);
 
@@ -50,21 +50,36 @@ class CreateStudent extends CreateRecord
         <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
         Your student account has been successfully created.</p>
 
-        <p><strong>Please find your login details below:</strong><br>
-        <strong>Student Name:</strong> {$user->name}<br>
-        <strong>User ID (Email):</strong> {$user->email}<br>
-        <strong>Temporary Password:</strong> {$tempPassword}</p>
+        <p><strong>Please find your login details below:</strong></p>
+        <table style='border-collapse: collapse;'>
+            <tr>
+                <td style='padding: 5px;'><strong>Student Name:</strong></td>
+                <td style='padding: 5px;'>{$user->name}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>Matric ID:</strong></td>
+                <td style='padding: 5px;'>{$matricId}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>User ID (Email):</strong></td>
+                <td style='padding: 5px;'>{$user->email}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>Temporary Password:</strong></td>
+                <td style='padding: 5px;'>{$tempPassword}</td>
+            </tr>
+        </table>
 
         <p style=\"text-align: center;\">
             <a href=\"{$link}\" 
             style=\"
-                    display: inline-block;
-                    padding: 10px 20px;
-                    font-size: 16px;
-                    color: #ffffff;
-                    background-color: #007bff;
-                    text-decoration: none;
-                    border-radius: 5px;
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #ffffff;
+                background-color: #007bff;
+                text-decoration: none;
+                border-radius: 5px;
             \">
             Click here to Login
             </a>
@@ -81,6 +96,7 @@ class CreateStudent extends CreateRecord
                     ->subject('Student - Account Credentials');
         });
     }
+
 
     protected function handleRecordCreation(array $data): Student
     {
@@ -143,7 +159,7 @@ class CreateStudent extends CreateRecord
 
         // Send email only if status is Registered
         if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
-            $this->sendRegistrationEmail($user, $tempPassword, $token);
+            $this->sendRegistrationEmail($user, $tempPassword, $token, $matricId);
         }
 
         return $student;

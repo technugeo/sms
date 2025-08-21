@@ -37,6 +37,7 @@ class Staff extends Model implements HasMedia
         'gender',
         'address_id',
         'department_id',
+        'faculty_id',
         'position',
         'race',
         'religion',
@@ -53,8 +54,6 @@ class Staff extends Model implements HasMedia
         'citizen' => CitizenEnum::class,
         'marriage_status' => MarriageEnum::class,
         'gender' => GenderEnum::class,
-        'employment_status' => StatusEnum::class,
-        'staff_type' => StaffTypeEnum::class,
     ];
 
     protected static function booted()
@@ -119,8 +118,14 @@ class Staff extends Model implements HasMedia
      */
     public function department()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Department::class, 'department_id', 'code');
     }
+
+    public function faculty()
+    {
+        return $this->belongsTo(Faculty::class, 'faculty_id', 'code');
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->user()->first()?->roles() ?? $this->belongsToMany(\Spatie\Permission\Models\Role::class); 

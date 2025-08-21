@@ -44,6 +44,7 @@ class Student extends Model
         'created_by',
         'updated_by',
         'deleted_by',
+        'institute_id',
     ];
 
     protected $casts = [
@@ -102,6 +103,10 @@ class Student extends Model
     }
 
    
+    public function institute()
+    {
+        return $this->belongsTo(\App\Models\Institute::class, 'institute_id', 'mqa_institute_id');
+    }
     
 
     

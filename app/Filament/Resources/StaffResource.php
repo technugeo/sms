@@ -32,6 +32,7 @@ use Filament\Tables\Filters\TrashedFilter;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class StaffResource extends Resource
 {
@@ -62,7 +63,7 @@ class StaffResource extends Resource
             $items[] = NavigationItem::make('Profile')
                 ->icon('heroicon-o-user-circle')
                 ->url(StaffResource::getUrl('view', ['record' => $staff->getKey()]))
-                ->group(static::getNavigationGroup())
+                ->group('My Account') // <-- different group
                 ->sort(1);
         }
 
@@ -136,59 +137,79 @@ class StaffResource extends Resource
                     ->columns(2)
                     ->schema([
 
-                        // Institute
-                        Forms\Components\Select::make('institute_id')
-                            ->relationship('institute', 'name')
-                            ->columnSpanFull()
-                            ->required()
-                            ->reactive(),
+                    Forms\Components\Select::make('institute_id')
+                        ->label('Institute')
+                        ->columnSpanFull()
+                        ->required()
+                        ->options(\App\Models\Institute::pluck('name', 'mqa_institute_id')->toArray()) // key = mqa_institute_id
+                        ->default(fn () => auth()->user()->hasRole('super_admin') 
+                            ? null 
+                            : optional(auth()->user()->staff)->institute_id)
+                        ->hidden(fn () => !auth()->user()->hasRole('super_admin')),
 
-                        // Roles
-                        Forms\Components\MultiSelect::make('user.roles')
-                            ->label('Roles')
-                            ->columnSpanFull()
-                            ->required()
-                            ->relationship('roles', 'name')
-                            ->preload()
-                            ->reactive(),
 
-                        // Department
-                        Forms\Components\Select::make('department_id')
-                            ->label('Department')
-                            ->reactive()
-                            ->options(function (callable $get) {
-                                $instituteId = $get('institute_id');
-                                $options = ['' => 'N/A']; // manual N/A
-                                if ($instituteId) {
-                                    $departments = \App\Models\Department::where('institute_id', $instituteId)
-                                        ->pluck('name', 'id')
-                                        ->toArray();
-                                    $options = $options + $departments;
-                                }
-                                return $options;
-                            })
-                            ->default('') // default N/A
-                            ->disabled(function (callable $get) {
-                                $roleIds = $get('user.roles') ?? [];
-                                $roles = \Spatie\Permission\Models\Role::whereIn('id', $roleIds)->pluck('name')->toArray();
-                                return in_array('academic_officer', $roles); // disabled if AO
-                            }),
+                    Forms\Components\Hidden::make('institute_id')
+                    
+                        ->default(fn () => auth()->user()->institute_id ?? auth()->user()->staff->institute_id ?? null)
+                        ->disabled(fn () => auth()->user()->hasRole('super_admin')),
 
-                        // Faculty
-                        Forms\Components\Select::make('faculty_id')
-                            ->label('Faculty')
-                            ->reactive()
-                            ->options(function (callable $get) {
-                                $instituteId = $get('institute_id');
-                                $options = ['' => 'N/A']; // manual N/A
-                                if ($instituteId) {
-                                    $faculties = \App\Models\Faculty::where('institute_code', $instituteId)
-                                        ->pluck('name', 'id')
-                                        ->toArray();
-                                    $options = $options + $faculties;
-                                }
-                                return $options;
-                            }),
+
+
+                    // Roles
+                    Forms\Components\MultiSelect::make('user.roles')
+                        ->label('Roles')
+                        ->columnSpanFull()
+                        ->required()
+                        ->relationship('roles', 'name')
+                        ->preload()
+                        ->reactive()
+                        ->disabled(fn () => !auth()->user()->hasAnyRole(['super_admin', 'account_admin'])),
+
+                    // Department
+                    Forms\Components\Select::make('department_id')   
+                        ->label('Department')
+                        ->reactive()
+                        ->options(function (callable $get) {
+                            $instituteId = $get('institute_id'); 
+                            $options = ['' => 'N/A'];
+
+                            if ($instituteId) {
+                                $departments = \App\Models\Department::where('institute_id', $instituteId)
+                                    ->pluck('name', 'code')  
+                                    ->toArray();
+                                $options = $options + $departments;
+                            }
+
+                            return $options;
+                        })
+                        ->default('')
+                        ->disabled(function (callable $get) {
+                            $roleIds = $get('user.roles') ?? [];
+                            $roles = \Spatie\Permission\Models\Role::whereIn('id', $roleIds)->pluck('name')->toArray();
+
+                            // Disable only if "academic_officer" is the ONLY role
+                            return count($roles) === 1 && in_array('academic_officer', $roles);
+                        }),
+
+                    // Faculty
+                    Forms\Components\Select::make('faculty_id')   // 👈 change field name
+                        ->label('Faculty')
+                        ->reactive()
+                        ->options(function (callable $get) {
+                            $instituteId = $get('institute_id'); 
+                            $options = ['' => 'N/A'];
+
+                            if ($instituteId) {
+                                $faculties = \App\Models\Faculty::where('institute_code', $instituteId)
+                                    ->pluck('name', 'code')   // 👈 key by code, not id
+                                    ->toArray();
+                                $options = $options + $faculties;
+                            }
+
+                            return $options;
+                        }),
+
+
 
                         Forms\Components\TextInput::make('position'),
 
@@ -226,12 +247,12 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('citizen'),
                 Tables\Columns\TextColumn::make('marriage_status'),
                 Tables\Columns\TextColumn::make('gender'),
-                // Tables\Columns\TextColumn::make('institute.name')
-                //     ->numeric()
-                //     ->sortable(),
-                Tables\Columns\TextColumn::make('department.name')
+                Tables\Columns\TextColumn::make('institute.name')
                     ->numeric()
                     ->sortable(),
+                // Tables\Columns\TextColumn::make('department.name')
+                //     ->numeric()
+                //     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('user.roles')
                     ->label('Roles')

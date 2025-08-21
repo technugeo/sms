@@ -40,9 +40,8 @@ class StudentsImport implements ToCollection, WithHeadingRow
         return $password;
     }
 
-    protected function sendRegistrationEmail(User $user, string $tempPassword): void
+    protected function sendRegistrationEmail(User $user, string $tempPassword, string $matricId): void
     {
-        // Insert password reset token record
         $token = Str::uuid();
         DB::table('password_reset_tokens')->insert([
             'user_id'            => $user->id,
@@ -63,21 +62,36 @@ class StudentsImport implements ToCollection, WithHeadingRow
         <p>Thank you for registering with <strong>Food Institute of Malaysia</strong>.<br>
         Your student account has been successfully created.</p>
 
-        <p><strong>Please find your login details below:</strong><br>
-        <strong>Student Name:</strong> {$user->name}<br>
-        <strong>User ID (Email):</strong> {$user->email}<br>
-        <strong>Temporary Password:</strong> {$tempPassword}<br>
-        
+        <p><strong>Please find your login details below:</strong></p>
+        <table style='border-collapse: collapse;'>
+            <tr>
+                <td style='padding: 5px;'><strong>Student Name:</strong></td>
+                <td style='padding: 5px;'>{$user->name}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>Matric ID:</strong></td>
+                <td style='padding: 5px;'>{$matricId}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>User ID (Email):</strong></td>
+                <td style='padding: 5px;'>{$user->email}</td>
+            </tr>
+            <tr>
+                <td style='padding: 5px;'><strong>Temporary Password:</strong></td>
+                <td style='padding: 5px;'>{$tempPassword}</td>
+            </tr>
+        </table>
+
         <p style=\"text-align: center;\">
             <a href=\"{$link}\" 
             style=\"
-                    display: inline-block;
-                    padding: 10px 20px;
-                    font-size: 16px;
-                    color: #ffffff;
-                    background-color: #007bff;
-                    text-decoration: none;
-                    border-radius: 5px;
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #ffffff;
+                background-color: #007bff;
+                text-decoration: none;
+                border-radius: 5px;
             \">
             Click here to Login
             </a>
@@ -106,7 +120,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
             'name'         => $row['full_name'],
             'email'        => $row['email'],
             'profile_type' => Student::class,
-            'role'         => 'student', // Student role
+            'role'         => 'student', 
             'password'     => $hashedTempPassword,
         ]);
 
@@ -123,6 +137,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
         $student = Student::create([
             'user_id'          => $user->id,
             'matric_id'        => $matricId,
+            'institute_id'     => $row['mqa_institute_id'],
             'current_course'   => $row['course_code'],
             'intake_month'     => $row['intake_month'],
             'intake_year'      => $row['intake_year'],
@@ -144,9 +159,10 @@ class StudentsImport implements ToCollection, WithHeadingRow
         ]);
 
         // Only send registration email if academic_status is "Registered"
-        if (!empty($row['academic_status']) && strtolower($row['academic_status']) === 'registered') {
-            $this->sendRegistrationEmail($user, $tempPassword);
+        if (isset($data['academic_status']) && $data['academic_status'] === 'Registered') {
+            $this->sendRegistrationEmail($user, $tempPassword, $token, $matricId);
         }
+
 
         return $student;
     }
@@ -158,7 +174,6 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Convert row collection to array
             $this->handleStudentCreation($row->toArray());
         }
     }
