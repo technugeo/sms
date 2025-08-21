@@ -23,38 +23,38 @@ class SuperAdminSeeder extends Seeder
 
         }
 
-        Artisan::call('shield:generate --all --panel=admin --ignore-existing-policies');
+        //Artisan::call('shield:generate --all --panel=admin --ignore-existing-policies');
 
-        $permissions = [
-            'view_on_student_profile', 
-            'view_on_staff_profile',  
-        ];
+//        $permissions = [
+//            'view_on_student_profile',
+//            'view_on_staff_profile',
+//        ];
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
-
-        $roles = [
-            'student' => [
-                'view_on_student_profile',
-            ],
-            'academic_officer' => [
-                'view_on_staff_profile',
-            ],
-            'non_academic_officer' => [
-                'view_on_staff_profile',
-            ],
-            'account_admin' => [
-                'view_on_staff_profile',
-            ],
-            'system_admin' => Permission::all()->pluck('name')->toArray(),
-            'super_admin' => Permission::all()->pluck('name')->toArray(),
-        ];
-
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-            $role->syncPermissions($rolePermissions);
-        }
+//        foreach ($permissions as $permission) {
+//            Permission::firstOrCreate(['name' => $permission]);
+//        }
+//
+//        $roles = [
+//            'student' => [
+//                'view_on_student_profile',
+//            ],
+//            'academic_officer' => [
+//                'view_on_staff_profile',
+//            ],
+//            'non_academic_officer' => [
+//                'view_on_staff_profile',
+//            ],
+//            'account_admin' => [
+//                'view_on_staff_profile',
+//            ],
+//            'system_admin' => Permission::all()->pluck('name')->toArray(),
+//            'super_admin' => Permission::all()->pluck('name')->toArray(),
+//        ];
+//
+//        foreach ($roles as $roleName => $rolePermissions) {
+//            $role = Role::firstOrCreate(['name' => $roleName]);
+//            $role->syncPermissions($rolePermissions);
+//        }
 
 
 
@@ -72,23 +72,23 @@ class SuperAdminSeeder extends Seeder
             ]
         );
 
-        // Ensure super_admin role exists
-        $saRole = Role::firstOrCreate(['name' => 'super_admin']);
-
-        // Assign role to user
-        $user->syncRoles([$saRole]);
-
-        // Give super_admin role all permissions
-        $saRole->givePermissionTo(Permission::all());
-
-        // Register as Filament Shield super-admin
-        Artisan::call('shield:super-admin', [
-            '--user' => $user->id,
-            '--panel' => 'admin',
-        ]);
-
-        // Clear cached permissions
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+//        // Ensure super_admin role exists
+//        $saRole = Role::firstOrCreate(['name' => 'super_admin']);
+//
+//        // Assign role to user
+//        $user->syncRoles([$saRole]);
+//
+//        // Give super_admin role all permissions
+//        $saRole->givePermissionTo(Permission::all());
+//
+//        // Register as Filament Shield super-admin
+//        Artisan::call('shield:super-admin', [
+//            '--user' => $user->id,
+//            '--panel' => 'admin',
+//        ]);
+//
+//        // Clear cached permissions
+//        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $this->command->info('Superadmin created with full permissions.');
     }
