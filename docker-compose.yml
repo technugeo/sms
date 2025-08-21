@@ -23,7 +23,7 @@ services:
       - ./html:/usr/share/nginx/html:rw
     environment:
       - VIRTUAL_HOST=fim-dev.nusmart.my
-      - VIRTUAL_PORT=80
+      - VIRTUAL_PORT=9000
       - LETSENCRYPT_HOST=fim-dev.nusmart.my
     networks:
       - nusmart-net
