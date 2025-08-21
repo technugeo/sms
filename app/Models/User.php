@@ -6,15 +6,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-use Spatie\Permission\Traits\HasRoles; 
-
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
-    
+    use HasFactory, Notifiable;
+
     protected $guard_name = 'web';
 
     /**
@@ -29,9 +27,9 @@ class User extends Authenticatable
         'password',
         'profile_type',
         'profile_id',
-        'email_verified_at',   
-        'is_active',          
-        'status',              
+        'email_verified_at',
+        'is_active',
+        'status',
     ];
 
     /**
@@ -54,7 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            
+
         ];
     }
 
