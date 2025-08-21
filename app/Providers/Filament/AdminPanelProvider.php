@@ -60,10 +60,7 @@ class AdminPanelProvider extends PanelProvider
 
 
             // -------- PAGES --------
-            ->pages([
-                Pages\Dashboard::class,
-                \App\Filament\Pages\UpdatePassword::class,
-            ])
+
 
 
             // -------- RESOURCE DISCOVERY --------
