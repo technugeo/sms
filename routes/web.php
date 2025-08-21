@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\ForcePasswordReset;
 
-Route::get('/login', Login::class)->name('filament.admin.auth.login');
+//Route::get('/login', Login::class)->name('filament.admin.auth.login');
 
 // Route::get('/force-password-reset', ForcePasswordReset::class)->name('filament.pages.auth.force-password-reset');
 
