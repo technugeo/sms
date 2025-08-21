@@ -13,8 +13,5 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-WORKDIR /var/www/html
-COPY . /var/www/html
-
 # Optional: copy custom www.conf if needed
 COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf

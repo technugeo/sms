@@ -37,8 +37,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->brandName('Student Management System') 
-            
+            ->brandName('Student Management System')
+
             // -------- USER MENU ITEMS --------
             ->userMenuItems([
                 'profile' => UserMenuItem::make()
@@ -94,8 +94,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make(),
-                
+
             ]);
     }
 }
