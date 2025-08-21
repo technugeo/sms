@@ -4,6 +4,9 @@ services:
   fim:
     build: .
     container_name: fim
+    user: "www-data:www-data"
+    expose:
+        -   9000
     restart: unless-stopped
     volumes:
       - .:/var/www/html
