@@ -27,7 +27,7 @@ CREATE TABLE `departments` (
   `institute_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(4) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
   `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `departments` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `departments_name_unique` (`name`),
   UNIQUE KEY `departments_code_unique` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +44,39 @@ CREATE TABLE `departments` (
 
 LOCK TABLES `departments` WRITE;
 /*!40000 ALTER TABLE `departments` DISABLE KEYS */;
-INSERT INTO `departments` VALUES (1,'FIM12','CULINARY ART','CA','-',NULL,'2025-08-14 22:25:23','2025-08-14 22:25:23',NULL),(2,'FIM12','TOURISM','TR','-',NULL,'2025-08-14 22:59:50','2025-08-14 22:59:50',NULL),(3,'FIM12','PASTRY & BAKERY','PB','-',NULL,'2025-08-14 23:06:22','2025-08-14 23:06:22',NULL),(4,'FIM12','FOODSERVICE MANAGEMENT','FSM','-',NULL,'2025-08-14 23:06:29','2025-08-14 23:06:29',NULL),(5,'FIM12','HOTEL','HT','-',NULL,'2025-08-14 23:06:36','2025-08-14 23:06:36',NULL);
+INSERT INTO `departments` (`institute_id`, `name`, `code`, `description`, `status`, `created_at`) VALUES
+('FIM', 'Bahagian Pengurusan Sumber Manusia', 'HRD', '-', 'Active', NOW()),
+('FIM', 'Bahagian Akaun', 'ACC', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kewangan', 'FIN', '-', 'Active', NOW()),
+('FIM', 'Bahagian Pembangunan', 'DEV', '-', 'Active', NOW()),
+('FIM', 'Bahagian Dasar Dan Penyelidikan', 'BDP', '-', 'Active', NOW()),
+('FIM', 'Bahagian Perancangan Strategik', 'BPS', '-', 'Active', NOW()),
+('FIM', 'Bahagian Hubungan Antarabangsa', 'BHA', '-', 'Active', NOW()),
+('FIM', 'Bahagian Khidmat Pengurusan', 'BKP', '-', 'Active', NOW()),
+('FIM', 'Bahagian Biasiswa', 'BSC', '-', 'Active', NOW()),
+('FIM', 'Bahagian Pengurusan Maklumat', 'BPM', '-', 'Active', NOW()),
+('FIM', 'Unit Undang-Undang', 'LAW', '-', 'Active', NOW()),
+('FIM', 'Unit Audit Dalam', 'AUD', '-', 'Active', NOW()),
+('FIM', 'Unit Komunikasi Korporat', 'BKK', '-', 'Active', NOW()),
+('FIM', 'Unit Integriti', 'INT', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kecemerlangan Akademik (BKA)', 'BKA', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kemasukan Pelajar', 'KPA', '-', 'Active', NOW()),
+('FIM', 'Bahagian Hal Ehwal Pelajar (BHEP)', 'HEP', '-', 'Active', NOW()),
+('FIM', 'Bahagian Penguatkuasaan dan Inspektorat (BPI)', 'BPI', '-', 'Active', NOW()),
+('FIM', 'Bahagian Koordinasi TVET', 'BKT', '-', 'Active', NOW()),
+('FIM', 'Bahagian Perancangan Program dan Institusi', 'BPPI', '-', 'Active', NOW()),
+('FIM', 'Pusat Penyelidikan dan Inovasi', 'PPI', '-', 'Active', NOW()),
+('FIM', 'Bahagian Governan dan Kecemerlangan', 'BGK', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kolaborasi Industri dan Komuniti', 'BKIK', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kurikulum', 'BKU', '-', 'Active', NOW()),
+('FIM', 'Bahagian Instruksional Dan Pembelajaran Digital', 'BIPD', '-', 'Active', NOW()),
+('FIM', 'Bahagian Peperiksaan & Penilaian', 'BPP', '-', 'Active', NOW()),
+('FIM', 'Bahagian Kompetensi dan Peningkatan Kerjaya', 'BKPK', '-', 'Active', NOW()),
+('FIM', 'Bahagian Ambilan & Pembangunan Pelajar', 'BAPP', '-', 'Active', NOW()),
+('FIM', 'Pasukan Petugas ICT', 'ICT', '-', 'Active', NOW()),
+('FIM', 'Bahagian Teknologi Maklumat', 'BTM', '-', 'Active', NOW());
+
+
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -57,4 +89,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-15 15:07:21
+-- Dump completed on 2025-08-21 16:32:58

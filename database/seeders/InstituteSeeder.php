@@ -23,6 +23,7 @@ class InstituteSeeder extends Seeder
             'faculties',
             'lib_course_prog',
             'lib_sem_subjects',
+            'departments',
             // 'role_has_permissions',
         ];
 
@@ -40,6 +41,7 @@ class InstituteSeeder extends Seeder
             'faculties.sql',
             'lib_course_prog.sql',
             'lib_sem_subjects.sql',
+            'departments.sql',
             // 'role_has_permissions.sql',
         ];
 
