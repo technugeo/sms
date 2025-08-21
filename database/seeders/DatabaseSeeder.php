@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(WorldSeeder::class); // countries, regions, etc.
-        
-        $this->call(RolesSeeder::class); // create roles
+
+        //$this->call(RolesSeeder::class); // create roles
 
         $this->call(SuperAdminSeeder::class); // create superadmin user and assign SA role
 
